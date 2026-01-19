@@ -18,4 +18,4 @@ jobs:
           python-version: '3.11'
 
       - name: Run the script
-        run: python hello.py
+        run: python main.py
