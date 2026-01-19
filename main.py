@@ -1,60 +1,45 @@
 import os
 import csv
-import json
 from firecrawl import Firecrawl
 
 def run_land_engine():
-    # 1. Initialize Firecrawl (Using the 2026 SDK naming)
+    # 1. Initialize the 2026 SDK
     app = Firecrawl(api_key=os.getenv("FIRECRAWL_API_KEY"))
     csv_file = "land_deals.csv"
     headers = ["url", "price", "area_sqm", "location", "has_water"]
 
-    # Ensure CSV exists
     if not os.path.exists(csv_file):
         with open(csv_file, 'w', newline='', encoding='utf-8') as f:
             writer = csv.DictWriter(f, fieldnames=headers)
             writer.writeheader()
 
-    # 2. Broad Search Strategy
-    # Using a simpler query to ensure Firecrawl finds results
-    query = "terrenos rusticos baratos Portugal OLX"
-    print(f"🔎 DEBUG: Searching Firecrawl for query: '{query}'")
+    # 2. Go directly to the SOURCE (OLX Alentejo Land Listings)
+    # This bypasses stale search engine indexes
+    list_url = "https://www.olx.pt/imoveis/terrenos-quintas/alentejo/"
+    
+    print(f"🔎 DEBUG: Accessing live listings at: {list_url}")
     
     try:
-        # We pass parameters directly to the search method
-        search_result = app.search(query, limit=5)
+        # We scrape the list page specifically to get 'links'
+        list_page = app.scrape(list_url, formats=["links"])
         
-        # Logging the raw structure to help you debug
-        print(f"🔎 DEBUG: Raw Search Result Type: {type(search_result)}")
+        # Access links found on the page
+        all_links = list_page.get('links', []) if isinstance(list_page, dict) else getattr(list_page, 'links', [])
         
-        # Safe extraction of links
-        if isinstance(search_result, dict):
-            listings = search_result.get('data', [])
-        else:
-            listings = getattr(search_result, 'data', [])
+        # Filter for actual listing links
+        listing_links = [l for l in all_links if "/d/anuncio/" in l]
+        
+        print(f"🔎 DEBUG: Found {len(listing_links)} live property links.")
 
-        print(f"🔎 DEBUG: Number of links found: {len(listings)}")
-
-        if not listings:
-            print("❌ No links found. The search index might be empty for this query.")
+        if not listing_links:
+            print("❌ No links found on the page. OLX might be using high-level bot protection.")
             return
 
-        # 3. Filter for a valid OLX listing
-        target_url = None
-        for item in listings:
-            link = item.get('url', '')
-            print(f"🔗 DEBUG: Checking link: {link}")
-            if "olx.pt" in link and "/d/anuncio/" in link:
-                target_url = link
-                break
-        
-        # If no OLX link specifically, just take the first result to prove it works
-        if not target_url:
-            target_url = listings[0].get('url')
-            print(f"⚠️ Warning: No direct OLX link found. Falling back to: {target_url}")
+        # --- MAX 1 POC ---
+        target_url = listing_links[0]
+        print(f"✨ Target found: {target_url}. Scraping details...")
 
-        # 4. Scrape the single target (Cost: 1 Credit)
-        print(f"✨ Scraping now: {target_url}")
+        # 3. Scrape the single target with our AI Schema
         scrape_result = app.scrape(target_url, formats=["json"], jsonOptions={
             "schema": {
                 "type": "object",
@@ -67,38 +52,28 @@ def run_land_engine():
                 "required": ["price"]
             }
         })
-
-        # Process data
-        if isinstance(scrape_result, dict):
-            data = scrape_result.get('json', {})
-        else:
-            data = getattr(scrape_result, 'json', {})
-
-        if not data:
-            print("⚠️ Scrape succeeded but AI returned no data. Check page content.")
-            return
-
-        row = {
-            "url": target_url,
-            "price": data.get("price"),
-            "area_sqm": data.get("area_sqm"),
-            "location": data.get("location"),
-            "has_water": data.get("has_water")
-        }
-
-        # 5. Final Save
-        with open(csv_file, 'a', newline='', encoding='utf-8') as f:
-            writer = csv.DictWriter(f, fieldnames=headers)
-            writer.writerow(row)
         
-        print(f"✅ SUCCESS! Saved: {row['price']}€ listing in {row['location']}")
+        data = scrape_result.get('json', {}) if isinstance(scrape_result, dict) else getattr(scrape_result, 'json', {})
+        
+        if data:
+            row = {
+                "url": target_url,
+                "price": data.get("price"),
+                "area_sqm": data.get("area_sqm"),
+                "location": data.get("location"),
+                "has_water": data.get("has_water")
+            }
+
+            # 4. Save to CSV
+            with open(csv_file, 'a', newline='', encoding='utf-8') as f:
+                writer = csv.DictWriter(f, fieldnames=headers)
+                writer.writerow(row)
+            
+            print(f"✅ SUCCESS! Saved {row['price']}€ listing in {row['location']} to CSV.")
+        else:
+            print("⚠️ Scrape succeeded but AI returned no data.")
 
     except Exception as e:
-        print(f"❌ FATAL ERROR: {str(e)}")
-        # Print more context if available
-        if hasattr(e, 'response'):
-            print(f"Response Status: {e.response.status_code}")
-            print(f"Response Body: {e.response.text}")
+        print(f"❌ SDK Error: {e}")
 
 if __name__ == "__main__":
-    run_land_engine()
