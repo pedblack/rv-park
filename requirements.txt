@@ -1,2 +1,9 @@
 firecrawl-py>=1.0.0
 pydantic
+playwright
+playwright-stealth
+httpx
+pandas
+tenacity
+pytest
+pytest-asyncio
