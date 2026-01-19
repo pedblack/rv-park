@@ -1,21 +1,43 @@
-name: Daily Hello World
+name: Daily Land Search Engine
+
 on:
   schedule:
-    # This is the "Cron" part. It means: "Run at 08:00 UTC every day"
+    # Runs at 08:00 UTC every single day
     - cron: '0 8 * * *'
-  workflow_dispatch: # This adds a "Run Now" button for testing
+  workflow_dispatch:
+    # This allows you to manually click "Run Workflow" for testing
 
 jobs:
-  build:
+  scrape_and_process:
     runs-on: ubuntu-latest
+    
+    # Optional: Limits the run time so you don't accidentally burn minutes
+    timeout-minutes: 10
+
     steps:
-      - name: Checkout code
+      # 1. Pulls your code from the repository into the runner
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
+      # 2. Sets up a clean Python 3.11 environment
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'pip' # Speeds up future runs by caching libraries
 
-      - name: Run the script
+      # 3. Installs the libraries listed in your requirements.txt
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 4. Executes your main script
+      # We map the GitHub Secrets to Environment Variables here
+      - name: Run Land Scraper
         run: python main.py
+        env:
+          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+          # Add more secrets here as we progress (Supabase, Gmail, etc.)
+          # GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          # GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
