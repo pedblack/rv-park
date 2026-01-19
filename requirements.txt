@@ -4,5 +4,5 @@ playwright
 playwright-stealth
 pandas
 tenacity
-httpx
 google-generativeai
+folium
