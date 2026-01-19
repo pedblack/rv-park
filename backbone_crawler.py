@@ -24,60 +24,71 @@ class P4NScraper:
             viewport={'width': 1280, 'height': 800}
         )
         page = await context.new_page()
-        await Stealth().apply_stealth_async(page)
+        # Use new Stealth class API
+        stealth = Stealth()
+        await stealth.apply_stealth_async(page)
         return browser, page
 
     async def discover_urls(self, page, search_url):
         """Phase 1: Find all location links on the search map."""
         print(f"🔍 Searching: {search_url}")
-        await page.goto(search_url, wait_until="networkidle")
-        
-        # Handle initial cookie gate
         try:
-            await page.click(".cc-btn-accept", timeout=3000)
-        except: pass
+            await page.goto(search_url, wait_until="networkidle", timeout=60000)
+            
+            # Handle initial cookie gate
+            try:
+                accept_btn = page.locator(".cc-btn-accept")
+                if await accept_btn.is_visible(timeout=5000):
+                    await accept_btn.click()
+            except: pass
 
-        await asyncio.sleep(4)
-        links = await page.locator("#searchmap-list-results li a").all()
-        for link in links:
-            href = await link.get_attribute("href")
-            if href and "/place/" in href:
-                full_url = f"https://park4night.com{href}"
-                if full_url not in self.discovery_links:
-                    self.discovery_links.append(full_url)
+            await asyncio.sleep(4)
+            links = await page.locator("#searchmap-list-results li a").all()
+            for link in links:
+                href = await link.get_attribute("href")
+                if href and "/place/" in href:
+                    full_url = f"https://park4night.com{href}"
+                    if full_url not in self.discovery_links:
+                        self.discovery_links.append(full_url)
+        except Exception as e:
+            print(f"⚠️ Discovery failed for {search_url}: {e}")
 
     async def extract_details(self, page, url):
         """Phase 2: Deep extraction from the individual location page."""
         print(f"📄 Deep Scraping: {url}")
         try:
-            await page.goto(url, wait_until="domcontentloaded")
-            await asyncio.sleep(random.uniform(3, 6)) # Jitter to prevent detection
+            await page.goto(url, wait_until="domcontentloaded", timeout=60000)
+            await asyncio.sleep(random.uniform(3, 5)) 
 
-            # 1. Identity & Type (using your specific Icon Title request)
+            # 1. Identity & Type (Natural Keys)
             p4n_id = await page.locator("body").get_attribute("data-place-id")
-            loc_type = await page.locator(".place-header-access img").get_attribute("title")
-            title = await page.locator(".place-header-name").inner_text()
+            title_el = page.locator(".place-header-name")
+            title = await title_el.inner_text() if await title_el.count() > 0 else "N/A"
+            
+            # Type icon title
+            type_img = page.locator(".place-header-access img")
+            loc_type = await type_img.get_attribute("title") if await type_img.count() > 0 else "Unknown"
 
-            # 2. Ratings & Meta
-            rating = await page.locator(".rating-note").first.inner_text() if await page.locator(".rating-note").count() > 0 else "0"
-            feedback_text = await page.locator(".place-feedback-average").inner_text()
-            ratings_count = re.search(r'\((\d+)\s+Feedback\)', feedback_text)
+            # 2. Ratings & Feedback
+            rating_el = page.locator(".rating-note").first
+            rating = await rating_el.inner_text() if await rating_el.count() > 0 else "0"
             
-            # 3. Counts from specific attributes and containers
-            photos_count = await page.locator("body").get_attribute("data-images-length")
+            feedback_el = page.locator(".place-feedback-average")
+            feedback_text = await feedback_el.inner_text() if await feedback_el.count() > 0 else "(0 Feedback)"
+            ratings_count_match = re.search(r'\((\d+)\s+', feedback_text)
+            ratings_count = ratings_count_match.group(1) if ratings_count_match else "0"
             
-            # Service count (First specs row)
-            services_row = page.locator(".place-specs .row").nth(0)
-            services_count = await services_row.locator("li").count()
+            # 3. Photo, Service, and Activity Counts
+            photos_count = await page.locator("body").get_attribute("data-images-length") or "0"
             
-            # Activity count (Second specs row)
-            activities_row = page.locator(".place-specs .row").nth(1)
-            activities_count = await activities_row.locator("li").count()
+            # Targeting rows by sequence as P4N structure is fixed
+            specs_rows = page.locator(".place-specs .row")
+            services_count = await specs_rows.nth(0).locator("li").count() if await specs_rows.count() > 0 else 0
+            activities_count = await specs_rows.nth(1).locator("li").count() if await specs_rows.count() > 1 else 0
 
             # 4. Parsing the Detail List (Price, Cost, Places)
             async def get_dl_data(label):
                 try:
-                    # Finds the <dt> with text, then gets the immediately following <dd>
                     val = await page.locator(f"dl.place-info-details dt:has-text('{label}') + dd").inner_text()
                     return val.strip()
                 except: return "N/A"
@@ -85,35 +96,6 @@ class P4NScraper:
             service_price = await get_dl_data("Price of services")
             parking_cost = await get_dl_data("Parking cost")
             num_places = await get_dl_data("Number of places")
-            creation_raw = await page.locator(".place-header-creation").inner_text()
-            creation_date = re.search(r'(\d{2}\.\d{2}\.\d{4})', creation_raw).group(1) if creation_raw else "N/A"
-
-            self.final_results.append({
-                "p4n_id": p4n_id,
-                "title": title.strip(),
-                "type": loc_type,
-                "rating": rating.replace('/5', ''),
-                "ratings_count": ratings_count.group(1) if ratings_count else "0",
-                "photos_count": photos_count,
-                "services_count": services_count,
-                "activities_count": activities_count,
-                "service_price": service_price,
-                "parking_cost": parking_cost,
-                "num_places": num_places,
-                "creation_date": creation_date,
-                "url": url
-            })
-        except Exception as e:
-            print(f"⚠️ Failed {url}: {e}")
-
-    async def run(self):
-        async with async_playwright() as p:
-            browser, page = await self.init_browser(p)
             
-            # Run Discovery
-            for url in TARGET_URLS:
-                await self.discover_urls(page, url)
-            
-            # Filter Discovery (Remove Advertising placeholders)
-            # ADVERTISING results usually don't have the standard /place/ID structure
-            unique_links = [l for l in self.discovery_links if re
+            creation_el = page.locator(".place-header-creation")
+            creation_raw = await creation_el.inner_text() if await creation_
