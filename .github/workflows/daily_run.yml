@@ -2,42 +2,39 @@ name: Daily Land Search Engine
 
 on:
   schedule:
-    # Runs at 08:00 UTC every single day
     - cron: '0 8 * * *'
   workflow_dispatch:
-    # This allows you to manually click "Run Workflow" for testing
 
 jobs:
-  scrape_and_process:
+  scrape_and_store:
     runs-on: ubuntu-latest
-    
-    # Optional: Limits the run time so you don't accidentally burn minutes
-    timeout-minutes: 10
+    # Added permissions so the Action can "Write" back to your repo
+    permissions:
+      contents: write
 
     steps:
-      # 1. Pulls your code from the repository into the runner
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 2. Sets up a clean Python 3.11 environment
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip' # Speeds up future runs by caching libraries
+          cache: 'pip'
 
-      # 3. Installs the libraries listed in your requirements.txt
       - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+        run: pip install firecrawl-py pydantic
 
-      # 4. Executes your main script
-      # We map the GitHub Secrets to Environment Variables here
       - name: Run Land Scraper
         run: python main.py
         env:
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
-          # Add more secrets here as we progress (Supabase, Gmail, etc.)
-          # GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
-          # GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+
+      # NEW STEP: Commit the CSV changes
+      - name: Commit and Push CSV
+        run: |
+          git config --global user.name "Land Bot"
+          git config --global user.email "bot@github.com"
+          git add land_deals.csv
+          git commit -m "Update land deals CSV [skip ci]" || echo "No changes to commit"
+          git push
