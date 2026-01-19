@@ -37,6 +37,16 @@ jobs:
         run: |
           git config --global user.name "P4N Bot"
           git config --global user.email "bot@github.com"
+          
+          # 1. Stage the changes
           git add backbone_locations.csv
+          
+          # 2. Commit only if there are changes
           git commit -m "Auto-update Portugal locations [skip ci]" || echo "No changes to commit"
-          git push
+          
+          # 3. Pull latest changes with rebase to avoid merge conflicts
+          # This handles the "fetch first" error you encountered
+          git pull --rebase origin main
+          
+          # 4. Push the combined work back to the repo
+          git push origin main
