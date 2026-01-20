@@ -33,6 +33,8 @@ jobs:
       - name: Run Atomic Scraper & Gemini AI Analysis
         env:
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          P4N_USERNAME: ${{ secrets.P4N_USERNAME }}
+          P4N_PASSWORD: ${{ secrets.P4N_PASSWORD }}
         run: python backbone_crawler.py
 
       - name: Generate Geospatial Visualization
