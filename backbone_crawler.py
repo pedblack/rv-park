@@ -114,12 +114,10 @@ class P4NScraper:
 
     async def analyze_with_ai(self, raw_data):
         system_instruction = (
-            "Analyze data and return JSON ONLY. "
-            "Schema: { 'parking_min': float, 'parking_max': float, 'electricity_eur': float, 'num_places': int, "
-            "'pros': [ {'topic': 'string', 'count': int} ], 'cons': [ {'topic': 'string', 'count': int} ], "
-            "'languages': [ {'lang': 'string', 'count': int} ] }. "
-            "1. Extract 'num_places' from the 'places_count' field. 2. List items by recurrence frequency. "
-            "3. Summary topics 3-5 words max."
+            "Analyze data and return JSON ONLY. Schema: { 'parking_min': float, 'parking_max': float, "
+            "'electricity_eur': float, 'num_places': int, 'pros': [ {'topic': 'string', 'count': int} ], "
+            "'cons': [ {'topic': 'string', 'count': int} ], 'languages': [ {'lang': 'string', 'count': int} ] }. "
+            "List by recurrence frequency. Topics 3-5 words max."
         )
         json_payload = json.dumps(raw_data, default=str, ensure_ascii=False)
         config = types.GenerateContentConfig(response_mime_type="application/json", temperature=0.1, system_instruction=system_instruction)
@@ -130,12 +128,11 @@ class P4NScraper:
         except: return {}
 
     async def extract_atomic(self, page, url, current_num, total_num):
-        print(f"➡️  [{current_num}/{total_num}] Scraping: {url}")
+        print(f"➡️  [{current_num}/{total_num}] Scraped Item: {url}")
         self.stats["read"] += 1
         try:
             await page.goto(url, wait_until="domcontentloaded")
             
-            # --- MIN REVIEWS CHECK ---
             stats_container = page.locator(".place-feedback-average")
             raw_count_text = await stats_container.locator("strong").inner_text()
             count_match = re.search(r'(\d+)', raw_count_text)
@@ -149,14 +146,11 @@ class P4NScraper:
             p_id = await page.locator("body").get_attribute("data-place-id") or url.split("/")[-1]
             title = (await page.locator("h1").first.inner_text()).split('\n')[0].strip()
             
-            # --- LOCATION TYPE EXTRACTION ---
             location_type = "Unknown"
             try:
-                # Grab the title attribute from the icon img in the header
                 location_type = await page.locator(".place-header-access img").get_attribute("title")
             except: pass
 
-            # Coordinates
             lat, lng = 0.0, 0.0
             coord_link = await page.locator("a[href*='lat='][href*='lng=']").first.get_attribute("href")
             if coord_link:
@@ -213,6 +207,10 @@ class P4NScraper:
 
             target_urls, current_idx, total_idx = DailyQueueManager.get_next_partition()
             print(f"\n📅 [PARTITION] Day {current_idx} of {total_idx}")
+            
+            # --- SEARCH LINK LOGGING ---
+            if target_urls:
+                print(f"🔗 [SEARCH LINK] Fetching from: {target_urls[0]}\n")
             
             discovery_links = []
             for url in target_urls:
