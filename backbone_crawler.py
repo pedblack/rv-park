@@ -80,12 +80,13 @@ class PipelineLogger:
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 class P4NScraper:
-    def __init__(self, is_dev=False):
+    def __init__(self, is_dev=False, force=False):
         self.is_dev = is_dev
+        self.force = force # New force recrawl flag
         self.csv_file = DEV_CSV if is_dev else PROD_CSV
         self.processed_batch = []
         self.existing_df = self._load_existing()
-        self.stats = {"read": 0, "discarded_fresh": 0, "discarded_low_feedback": 0}
+        self.stats = {"read": 0, "discarded_fresh": 0, "discarded_low_feedback": 0, "gemini_calls": 0}
 
     def _load_existing(self):
         if os.path.exists(self.csv_file):
@@ -109,17 +110,14 @@ class P4NScraper:
             await page.click(".modal-footer button[type='submit']:has-text('Login')", force=True)
             await page.wait_for_load_state("networkidle")
             await asyncio.sleep(6)
-            
-            # --- SCREENSHOT AFTER LOGIN ---
             await page.screenshot(path="login_success.png", full_page=True)
-            print("✅ [LOGIN] Success - Screenshot captured: login_success.png")
-            
+            print("✅ [LOGIN] Success - Screenshot captured.")
         except Exception as e: 
-            print(f"❌ [LOGIN] Failed: {e}")
-            # Capture screenshot even on failure for debugging
             await page.screenshot(path="login_failure.png")
+            print(f"❌ [LOGIN] Failed: {e}")
 
     async def analyze_with_ai(self, raw_data):
+        self.stats["gemini_calls"] += 1
         system_instruction = (
             "Analyze data and return JSON ONLY. Schema: { 'parking_min': float, 'parking_max': float, "
             "'electricity_eur': float, 'num_places': int, 'pros': [ {'topic': 'string', 'count': int} ], "
@@ -139,7 +137,6 @@ class P4NScraper:
         self.stats["read"] += 1
         try:
             await page.goto(url, wait_until="domcontentloaded")
-            
             stats_container = page.locator(".place-feedback-average")
             raw_count_text = await stats_container.locator("strong").inner_text()
             count_match = re.search(r'(\d+)', raw_count_text)
@@ -152,12 +149,10 @@ class P4NScraper:
 
             p_id = await page.locator("body").get_attribute("data-place-id") or url.split("/")[-1]
             title = (await page.locator("h1").first.inner_text()).split('\n')[0].strip()
-            
             location_type = "Unknown"
-            try:
-                location_type = await page.locator(".place-header-access img").get_attribute("title")
+            try: location_type = await page.locator(".place-header-access img").get_attribute("title")
             except: pass
-
+            
             lat, lng = 0.0, 0.0
             coord_link = await page.locator("a[href*='lat='][href*='lng=']").first.get_attribute("href")
             if coord_link:
@@ -166,27 +161,22 @@ class P4NScraper:
 
             raw_rate = await stats_container.locator(".text-gray").inner_text()
             avg_rating = float(re.search(r'(\d+\.?\d*)', raw_rate).group(1)) if re.search(r'(\d+\.?\d*)', raw_rate) else 0.0
-
             review_els = await page.locator(".place-feedback-article-content").all()
             reviews_text = [await r.text_content() for r in review_els]
 
             raw_payload = {
-                "p4n_id": p_id,
-                "location_type": location_type,
+                "p4n_id": p_id, "location_type": location_type,
                 "places_count": await self._get_dl(page, "Number of places"),
                 "parking_cost": await self._get_dl(page, "Parking cost"),
                 "services_cost": await self._get_dl(page, "Price of services"),
                 "all_reviews": reviews_text 
             }
-            
             ai_data = await self.analyze_with_ai(raw_payload)
             row = {
                 "p4n_id": p_id, "title": title, "url": url, "latitude": lat, "longitude": lng,
-                "location_type": location_type,
-                "num_places": ai_data.get("num_places", 0),
+                "location_type": location_type, "num_places": ai_data.get("num_places", 0),
                 "total_reviews": actual_feedback_count, "avg_rating": avg_rating,
-                "parking_min_eur": ai_data.get("parking_min", 0),
-                "parking_max_eur": ai_data.get("parking_max", 0),
+                "parking_min_eur": ai_data.get("parking_min", 0), "parking_max_eur": ai_data.get("parking_max", 0),
                 "electricity_eur": ai_data.get("electricity_eur", 0),
                 "ai_pros": "; ".join([f"{p['topic']} ({p['count']})" for p in ai_data.get('pros', [])]),
                 "ai_cons": "; ".join([f"{c['topic']} ({c['count']})" for c in ai_data.get('cons', [])]),
@@ -204,7 +194,7 @@ class P4NScraper:
     async def start(self):
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
-            context = await browser.new_context(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+            context = await browser.new_context(user_agent="Mozilla/5.0...")
             page = await context.new_page()
             await Stealth().apply_stealth_async(page)
             await page.goto("https://park4night.com/en", wait_until="networkidle")
@@ -214,10 +204,7 @@ class P4NScraper:
 
             target_urls, current_idx, total_idx = DailyQueueManager.get_next_partition()
             print(f"\n📅 [PARTITION] Day {current_idx} of {total_idx}")
-            
-            # --- SEARCH LINK LOGGING ---
-            if target_urls:
-                print(f"🔗 [SEARCH LINK] Fetching from: {target_urls[0]}\n")
+            if target_urls: print(f"🔗 [SEARCH LINK] Fetching from: {target_urls[0]}\n")
             
             discovery_links = []
             for url in target_urls:
@@ -229,35 +216,31 @@ class P4NScraper:
 
             discovered = list(set(discovery_links))
             queue = []
-            
             for link in discovered:
                 if self.is_dev and len(queue) >= DEV_LIMIT: break
                 p_id = link.split("/")[-1]
+                
+                # Logic: If 'force' is True, we always recrawl.
                 is_stale = True
-                if not self.existing_df.empty and p_id in self.existing_df['p4n_id'].astype(str).values:
+                if not self.force and not self.existing_df.empty and p_id in self.existing_df['p4n_id'].astype(str).values:
                     last_date = self.existing_df[self.existing_df['p4n_id'].astype(str) == p_id]['last_scraped'].iloc[0]
                     if pd.notnull(last_date) and (datetime.now() - last_date) < timedelta(days=STALENESS_DAYS):
                         is_stale = False
                 
-                if is_stale: queue.append(link)
-                else: 
-                    print(f"🗑️  [DISCARD] Skipping {p_id}: Updated within 30 days.")
+                if is_stale or self.force: queue.append(link)
+                else:
                     self.stats["discarded_fresh"] += 1
+                    print(f"🗑️  [DISCARD] Skipping {p_id}: Updated within 30 days.")
 
-            print(f"🔍 Found {len(discovered)} items. TTL skips: {self.stats['discarded_fresh']}. Stale items: {len(queue)}\n")
+            if self.force: print(f"⚡ [FORCE] Overriding staleness. Processing all {len(queue)} items.")
+            print(f"🔍 Found {len(discovered)} total items. Processing: {len(queue)}\n")
+            
             for i, link in enumerate(queue, 1):
                 await self.extract_atomic(page, link, i, len(queue))
             
             await browser.close()
             self._upsert_and_save()
-            
-            print(f"\n🏁 [RUN SUMMARY]")
-            print(f"🔹 Total identified: {len(discovered)}")
-            print(f"🔹 Scrape attempts: {self.stats['read']}")
-            print(f"🔹 Discarded (Fresh): {self.stats['discarded_fresh']}")
-            print(f"🔹 Discarded (Low Feed): {self.stats['discarded_low_feedback']}")
-            print(f"🚀 Database Refreshed: {len(self.processed_batch)} records.")
-
+            print(f"\n🏁 [RUN SUMMARY]\n🔹 Scraped: {self.stats['read']}\n🤖 Gemini Calls: {self.stats['gemini_calls']}")
             if not self.is_dev: DailyQueueManager.increment_state()
 
     def _upsert_and_save(self):
@@ -270,5 +253,6 @@ class P4NScraper:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--dev', action='store_true')
+    parser.add_argument('--force', action='store_true', help='Force recrawl even if fresh')
     args = parser.parse_args()
-    asyncio.run(P4NScraper(is_dev=args.dev).start())
+    asyncio.run(P4NScraper(is_dev=args.dev, force=args.force).start())
