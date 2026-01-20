@@ -2,7 +2,7 @@ name: Daily Land Search & Map
 
 on:
   schedule:
-    - cron: '0 8 * * *' # Daily Prod Run
+    - cron: '0 8 * * *' # Daily Prod Run at 08:00 UTC
   workflow_dispatch:
     inputs:
       mode:
@@ -13,15 +13,23 @@ on:
         options:
           - prod
           - dev
+      skip_crawl:
+        description: 'Skip crawling and only run visualization'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   scrape_and_visualize:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -35,6 +43,8 @@ jobs:
           playwright install chromium --with-deps
 
       - name: Run Unified Scraper
+        # Logic: Skip this step if skip_crawl is checked AND it's a manual run
+        if: github.event.inputs.skip_crawl != 'true'
         env:
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           P4N_USERNAME: ${{ secrets.P4N_USERNAME }}
@@ -48,14 +58,14 @@ jobs:
 
       - name: Generate Visualization
         run: |
-          # Use dev CSV if it exists
+          # Priority: Use dev CSV if we just ran a dev scrape
           if [ -f "backbone_locations_dev.csv" ]; then
             export CSV_FILE="backbone_locations_dev.csv"
           fi
           python visualize_land.py
 
       - name: Upload Pipeline Artifacts
-        if: always() # Ensure this runs even if the scraper fails
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: pipeline-debug-package
@@ -65,10 +75,11 @@ jobs:
           retention-days: ${{ github.event.inputs.mode == 'dev' && 1 || 30 }}
 
       - name: Commit and Push (Prod Only)
+        # Only persist data if we are in prod mode
         if: github.event.inputs.mode != 'dev'
         run: |
           git config --global user.name "P4N Bot"
           git config --global user.email "bot@github.com"
-          # Ensure queue_state.json is added to track progress
+          # Ensure both data, the rolling partition state, and the map are updated
           git add backbone_locations.csv portugal_land_map.html queue_state.json pipeline_execution.log
-          git diff --staged --quiet || (git commit -m "Auto-update state & data [skip ci]" && git push)
+          git diff --staged --quiet || (git commit -m "Auto-update state & map [skip ci]" && git push)
