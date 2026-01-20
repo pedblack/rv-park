@@ -12,12 +12,12 @@ from playwright.async_api import async_playwright
 from playwright_stealth import Stealth
 
 # --- CONFIGURABLE CONSTANTS ---
-MAX_REVIEWS = 100            
+MAX_REVIEWS = 100            # Standard review count for AI analysis
 MODEL_NAME = "gemini-2.5-flash-lite" 
 PROD_CSV = "backbone_locations.csv"
 DEV_CSV = "backbone_locations_dev.csv"
 LOG_FILE = "pipeline_execution.log"
-AI_DELAY = 0.5               
+AI_DELAY = 0.5               # Tier 1 Quota speed (300 RPM)
 
 # --- SYSTEM SETTINGS ---
 GEMINI_API_KEY = os.environ.get("GOOGLE_API_KEY")
@@ -32,25 +32,27 @@ TARGET_URLS = [
 class PipelineLogger:
     @staticmethod
     def log_event(event_type, data):
-        """Timestamped JSON logging with datetime safety."""
-        # default=str handles datetime objects by converting them to strings
-        log_entry = json.loads(json.dumps({
+        """Saves timestamped events to the log file with pretty-printing and datetime safety."""
+        # json.dumps(default=str) ensures datetime objects don't crash the log
+        log_entry = {
             "timestamp": datetime.now().isoformat(),
             "type": event_type,
             "content": data
-        }, default=str))
+        }
         
         with open(LOG_FILE, "a", encoding="utf-8") as f:
-            f.write(json.dumps(log_entry) + "\n")
+            # indent=4 provides the requested pretty-printing
+            f.write(json.dumps(log_entry, indent=4, default=str) + "\n" + "-"*50 + "\n")
 
     @staticmethod
     async def save_screenshot(page, name):
+        """Captures a screenshot for auditing login or extraction failures."""
         path = f"debug_{name}_{datetime.now().strftime('%H%M%S')}.png"
         await page.screenshot(path=path)
         print(f"📸 DEBUG: Screenshot saved: {path}")
 
 if not GEMINI_API_KEY:
-    print("❌ ERROR: GOOGLE_API_KEY missing.")
+    print("❌ ERROR: GOOGLE_API_KEY is missing.")
     exit(1)
 
 client = genai.Client(api_key=GEMINI_API_KEY)
@@ -70,40 +72,47 @@ class P4NScraper:
                 df = pd.read_csv(self.csv_file)
                 df['last_scraped'] = pd.to_datetime(df['last_scraped'])
                 return df
-            except: pass
+            except Exception: pass
         return pd.DataFrame()
 
     async def login(self, page):
-        """Resilient login using explicit button targeting and human-like delays."""
+        """Human-stealth login sequence using targeted button clicks."""
         if not P4N_USER or not P4N_PASS: return
         print(f"🔐 Attempting Login for {P4N_USER}...")
         try:
-            # 1. Trigger Modal
-            await page.click(".pageHeader-account-button")
+            # 1. Open the Account Dropdown
+            account_btn = page.locator(".pageHeader-account-button")
+            await account_btn.hover()
+            await account_btn.click()
             await asyncio.sleep(2)
-            await page.click(".pageHeader-account-dropdown >> text='Login'", force=True)
+            
+            # 2. Open the Modal via the Login link in dropdown
+            login_trigger = page.locator(".pageHeader-account-dropdown >> text='Login'")
+            await login_trigger.hover()
+            await login_trigger.click(force=True)
             await page.wait_for_selector("#signinUserId", state="visible")
 
-            # 2. Fill inputs with slight random delays to mimic typing
-            await page.type("#signinUserId", P4N_USER, delay=random.randint(50, 150))
-            await page.type("#signinPassword", P4N_PASS, delay=random.randint(50, 150))
+            # 3. Simulate human typing for credentials
+            await page.type("#signinUserId", P4N_USER, delay=random.randint(70, 200))
+            await asyncio.sleep(random.uniform(0.5, 1.2))
+            await page.type("#signinPassword", P4N_PASS, delay=random.randint(70, 200))
             
-            # 3. Click the specific submit button in the modal footer
-            # Using force and a slight delay before clicking
+            # 4. Target the specific Submit button in the modal footer
             submit_btn = page.locator(".modal-footer button[type='submit']:has-text('Login')")
-            await asyncio.sleep(1)
+            await submit_btn.hover()
+            await asyncio.sleep(0.8)
             await submit_btn.click(force=True)
             
-            # 4. Wait for Modal to disappear
+            # 5. Wait for Modal state change and stability
             try:
                 await page.wait_for_selector("#signinModal", state="hidden", timeout=12000)
-            except: 
-                print("⚠️ Modal still visible after login attempt.")
+            except Exception: 
+                await page.keyboard.press("Enter")
             
             await page.wait_for_load_state("networkidle")
-            await asyncio.sleep(5) 
+            await asyncio.sleep(6) 
 
-            # 5. Verification
+            # 6. Verification
             user_span = page.locator(".pageHeader-account-button span")
             actual_username = await user_span.inner_text()
             
@@ -111,7 +120,7 @@ class P4NScraper:
                 print(f"✅ Logged in as: {actual_username}")
                 PipelineLogger.log_event("LOGIN_SUCCESS", {"user": actual_username})
             else:
-                print(f"⚠️ Verification Failed. Header shows: '{actual_username}'")
+                print(f"⚠️ Verification Failed. Found: '{actual_username}'")
                 await PipelineLogger.save_screenshot(page, "login_verify_failed")
                 PipelineLogger.log_event("LOGIN_FAILURE_AUDIT", {"header_text": actual_username})
         except Exception as e:
@@ -121,6 +130,7 @@ class P4NScraper:
 
     async def analyze_with_ai(self, raw_data):
         """Atomic AI call with safety for datetime serialization."""
+        # Convert all content to JSON string for the prompt
         json_payload = json.dumps(raw_data, default=str)
         prompt = f"Analyze property data. Return JSON only:\n{json_payload}"
         
@@ -146,8 +156,22 @@ class P4NScraper:
             await page.goto(url, wait_until="domcontentloaded")
             p_id = await page.locator("body").get_attribute("data-place-id") or url.split("/")[-1]
             title = (await page.locator("h1").first.inner_text()).split('\n')[0].strip()
-            review_els = await page.locator(".place-feedback-article-content").all()
             
+            # --- COORDINATE EXTRACTION ---
+            lat, lng = 0.0, 0.0
+            try:
+                # Target the map search link containing latitude/longitude parameters
+                coord_link = await page.locator("a[href*='lat='][href*='lng=']").first.get_attribute("href")
+                if coord_link:
+                    lat_match = re.search(r'lat=([-+]?\d*\.\d+|\d+)', coord_link)
+                    lng_match = re.search(r'lng=([-+]?\d*\.\d+|\d+)', coord_link)
+                    if lat_match and lng_match:
+                        lat = float(lat_match.group(1))
+                        lng = float(lng_match.group(1))
+            except Exception as e:
+                print(f"⚠️ Coord extraction failed for {p_id}: {e}")
+
+            review_els = await page.locator(".place-feedback-article-content").all()
             raw_payload = {
                 "p4n_id": p_id,
                 "reviews": [await r.inner_text() for r in review_els[:self.current_max_reviews]]
@@ -155,7 +179,11 @@ class P4NScraper:
             ai_data = await self.analyze_with_ai(raw_payload)
 
             row = {
-                "p4n_id": p_id, "title": title, "url": url,
+                "p4n_id": p_id, 
+                "title": title, 
+                "url": url,
+                "latitude": lat,
+                "longitude": lng,
                 "parking_min_eur": ai_data.get("parking_min", 0),
                 "ai_pros": ai_data.get("pros", "N/A"),
                 "last_scraped": datetime.now()
@@ -169,13 +197,14 @@ class P4NScraper:
     async def start(self):
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
-            context = await browser.new_context(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
+            # High-reputation context to bypass detection
+            context = await browser.new_context(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
             page = await context.new_page()
             await Stealth().apply_stealth_async(page)
             
             await page.goto("https://park4night.com/en", wait_until="networkidle")
             try: await page.click(".cc-btn-accept", timeout=3000)
-            except: pass
+            except Exception: pass
             await self.login(page)
 
             for url in TARGET_URLS:
@@ -187,7 +216,7 @@ class P4NScraper:
                         if href:
                             self.discovery_links.append(f"https://park4night.com{href}" if href.startswith("/") else href)
                         if self.is_dev and len(self.discovery_links) >= 1: break
-                except: pass
+                except Exception: pass
                 if self.is_dev and len(self.discovery_links) >= 1: break
 
             queue = []
