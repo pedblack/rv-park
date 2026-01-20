@@ -11,6 +11,7 @@ def generate_map():
         print(f"❌ {CSV_FILE} not found.")
         return
 
+    # Load and clean data
     df = pd.read_csv(CSV_FILE)
     df_clean = df[(df['latitude'] != 0) & (df['longitude'] != 0)].dropna(subset=['latitude', 'longitude'])
 
@@ -18,9 +19,10 @@ def generate_map():
         print("⚠️ No valid data found.")
         return
 
+    # Initialize Map
     m = folium.Map(location=[38.5, -7.9], zoom_start=9, tiles="cartodbpositron")
     
-    # FeatureGroup for unbundled markers
+    # FeatureGroup for markers - this is what the JS will search for
     marker_layer = folium.FeatureGroup(name="MainPropertyLayer")
     marker_layer.add_to(m)
 
@@ -34,7 +36,6 @@ def generate_map():
             except: return 0
 
         num_places = clean_int(row.get('num_places', 0))
-        intensity = float(row.get('intensity_index', 0)) if not pd.isna(row.get('intensity_index')) else 0
         
         popup_html = f"""<div style="font-family: Arial; width: 300px;">
             <h3>{row['title']}</h3>
@@ -48,7 +49,7 @@ def generate_map():
             icon=folium.Icon(color='green' if row['avg_rating'] >= 4 else 'orange', icon='home', prefix='fa')
         )
         
-        # Binding metadata for the JS engine
+        # Binding metadata for the JS engine - Standardized to extra_data
         marker.options['extra_data'] = {
             'rating': float(row['avg_rating']),
             'places': num_places,
@@ -56,8 +57,7 @@ def generate_map():
         }
         marker.add_to(marker_layer)
 
-    # --- THE BREAKTHROUGH JAVASCRIPT ---
-    # We use a double-curly brace approach for Python-safe f-strings
+    # --- THE FILTER JAVASCRIPT ---
     filter_html = f"""
     <style>
         .map-overlay {{ font-family: sans-serif; background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); position: fixed; z-index: 9999; }}
@@ -98,15 +98,18 @@ def generate_map():
     }}
 
     function findLayer() {{
-        // Direct scan for any LayerGroup that contains our extra_data
+        // Scans all global objects to find the Folium FeatureGroup containing our markers
         for (let key in window) {{
-            if (window[key] instanceof L.LayerGroup || window[key] instanceof L.FeatureGroup) {{
-                let layers = window[key].getLayers();
-                if (layers.length > 0 && layers[0].options && layers[0].options.extra_data) {{
-                    return window[key];
+            try {{
+                if (window[key] instanceof L.LayerGroup || window[key] instanceof L.FeatureGroup) {{
+                    let layers = window[key].getLayers();
+                    // Robust check: ensure the layer group contains markers with our metadata key
+                    if (layers.length > 0 && layers[0].options && layers[0].options.extra_data) {{
+                        return window[key];
+                    }}
                 }}
-            }}
-        }}
+            } catch(e) {{ continue; }}
+        }
         return null;
     }}
 
@@ -117,8 +120,12 @@ def generate_map():
         const type = document.getElementById('sel-type').value;
 
         if (!targetLayer) targetLayer = findLayer();
-        if (!targetLayer) {{ log("Err: Layer not found"); return; }}
+        if (!targetLayer) {{ 
+            log("Err: Layer not found"); 
+            return; 
+        }}
 
+        // Initialize the master list of markers on first run
         if (!markerStore) {{
             markerStore = targetLayer.getLayers();
             log("Backup created: " + markerStore.length);
@@ -128,7 +135,10 @@ def generate_map():
 
         const filtered = markerStore.filter(m => {{
             const d = m.options.extra_data;
-            return d.rating >= minR && d.places >= minP && (type === "All" || d.type === type);
+            if (!d) return false;
+            return d.rating >= minR && 
+                   d.places >= minP && 
+                   (type === "All" || d.type === type);
         }});
 
         filtered.forEach(m => targetLayer.addLayer(m));
@@ -148,7 +158,7 @@ def generate_map():
     """
     m.get_root().html.add_child(folium.Element(filter_html))
     m.save("index.html")
-    print("🚀 Map generated with Reset button, No Bundling, and Debug Log.")
+    print(f"🚀 Map successfully generated for {len(df_clean)} locations.")
 
 if __name__ == "__main__":
     generate_map()
