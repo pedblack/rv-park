@@ -18,11 +18,11 @@ PROD_CSV = "backbone_locations.csv"
 DEV_CSV = "backbone_locations_dev.csv"
 LOG_FILE = "pipeline_execution.log"
 AI_DELAY = 0.5               
-STALENESS_DAYS = 30          # Recrawl only if older than 30 days
+STALENESS_DAYS = 30          
 
 # --- PARTITION SETTINGS ---
-URL_LIST_FILE = "url_list.txt"   # List of 30 Search URLs
-STATE_FILE = "queue_state.json"  # Tracking cursor
+URL_LIST_FILE = "url_list.txt"   
+STATE_FILE = "queue_state.json"  
 
 # --- SYSTEM SETTINGS ---
 GEMINI_API_KEY = os.environ.get("GOOGLE_API_KEY")
@@ -30,7 +30,6 @@ P4N_USER = os.environ.get("P4N_USERNAME")
 P4N_PASS = os.environ.get("P4N_PASSWORD") 
 
 class DailyQueueManager:
-    """Manages the 30-day rolling cycle logic."""
     @staticmethod
     def get_next_partition():
         if not os.path.exists(URL_LIST_FILE):
@@ -53,7 +52,6 @@ class DailyQueueManager:
 class PipelineLogger:
     @staticmethod
     def log_event(event_type, data):
-        """Saves formatted JSON events with Unicode support."""
         processed_content = {}
         for k, v in data.items():
             if isinstance(v, str) and (v.strip().startswith('{') or v.strip().startswith('[')):
@@ -96,21 +94,28 @@ class P4NScraper:
             await page.wait_for_load_state("networkidle")
             await asyncio.sleep(6)
             print("✅ [LOGIN] Success")
-        except: 
-            print("❌ [LOGIN] Failed")
+        except: print("❌ [LOGIN] Failed")
 
     async def analyze_with_ai(self, raw_data):
-        """Succinct AI extraction for pricing and reviews."""
+        """AI analysis with recurrence frequency and language detection."""
         system_instruction = (
-            "You are a property analyst. Return JSON ONLY. "
-            "Schema: { 'parking_min': float, 'parking_max': float, 'electricity_eur': float, 'pros': 'string', 'cons': 'string' }. "
-            "1. Extract from 'parking_cost' field. 2. Extract electricity from 'services_cost'. 3. Pros/Cons must be 3-5 words max."
+            "Analyze property data and return JSON ONLY. "
+            "Schema: { "
+            "'parking_min': float, 'parking_max': float, 'electricity_eur': float, "
+            "'pros': [ {'topic': 'string', 'count': int} ], "
+            "'cons': [ {'topic': 'string', 'count': int} ], "
+            "'languages': [ {'lang': 'string', 'count': int} ] "
+            "}. "
+            "1. List 'pros', 'cons', and 'languages' by recurrence frequency (highest count first). "
+            "2. 'count' is total occurrences across all provided reviews. "
+            "3. Topics must be extremely succinct (3-5 words max). "
+            "4. For languages, use full names (e.g., 'French', 'German')."
         )
         json_payload = json.dumps(raw_data, default=str, ensure_ascii=False)
         config = types.GenerateContentConfig(response_mime_type="application/json", temperature=0.1, system_instruction=system_instruction)
         try:
             await asyncio.sleep(AI_DELAY) 
-            response = await client.aio.models.generate_content(model=MODEL_NAME, contents=f"ANALYZE:\n{json_payload}", config=config)
+            response = await client.aio.models.generate_content(model=MODEL_NAME, contents=f"ANALYZE BATCH:\n{json_payload}", config=config)
             return json.loads(response.text)
         except: return {}
 
@@ -137,8 +142,7 @@ class P4NScraper:
                 avg_rating = float(re.search(r'(\d+\.?\d*)', raw_rate).group(1))
             except: pass
 
-            # --- HIDDEN COMMENT EXTRACTION ---
-            # text_content() captures elements even if hidden via CSS 'd-none'
+            # --- REVIEWS ---
             review_els = await page.locator(".place-feedback-article-content").all()
             reviews_text = [await r.text_content() for r in review_els[:MAX_REVIEWS]]
 
@@ -146,10 +150,16 @@ class P4NScraper:
                 "p4n_id": p_id,
                 "parking_cost": await self._get_dl(page, "Parking cost"),
                 "services_cost": await self._get_dl(page, "Price of services"),
-                "reviews": reviews_text
+                "reviews_to_summarize": reviews_text
             }
             
             ai_data = await self.analyze_with_ai(raw_payload)
+            
+            # Formatted strings for CSV storage
+            pros_str = "; ".join([f"{p['topic']} ({p['count']})" for p in ai_data.get('pros', [])])
+            cons_str = "; ".join([f"{c['topic']} ({c['count']})" for c in ai_data.get('cons', [])])
+            lang_str = "; ".join([f"{l['lang']} ({l['count']})" for l in ai_data.get('languages', [])])
+
             row = {
                 "p4n_id": p_id, "title": title, "url": url,
                 "latitude": lat, "longitude": lng,
@@ -157,8 +167,9 @@ class P4NScraper:
                 "parking_min_eur": ai_data.get("parking_min", 0),
                 "parking_max_eur": ai_data.get("parking_max", 0),
                 "electricity_eur": ai_data.get("electricity_eur", 0),
-                "ai_pros": ai_data.get("pros", "N/A"),
-                "ai_cons": ai_data.get("cons", "N/A"),
+                "ai_pros": pros_str,
+                "ai_cons": cons_str,
+                "top_languages": lang_str,
                 "last_scraped": datetime.now()
             }
             PipelineLogger.log_event("STORAGE_ROW", row)
@@ -181,9 +192,8 @@ class P4NScraper:
             await self.login(page)
 
             target_urls, current_idx, total_idx = DailyQueueManager.get_next_partition()
-            print(f"\n📅 [PARTITION] Day {current_idx} of {total_idx}")
-            PipelineLogger.log_event("DAILY_CYCLE_START", {"partition": f"{current_idx}/{total_idx}", "url": target_urls[0]})
-
+            print(f"\n📅 [PARTITION] Day {current_idx} of {total_idx}\n")
+            
             discovery_links = []
             for url in target_urls:
                 await page.goto(url, wait_until="networkidle")
@@ -193,9 +203,6 @@ class P4NScraper:
                     if href: discovery_links.append(f"https://park4night.com{href}" if href.startswith("/") else href)
 
             discovered = list(set(discovery_links))
-            print(f"🔍 [DISCOVERY] Found {len(discovered)} total properties in this region.")
-
-            # --- STALENESS FILTERING ---
             queue = []
             skipped_count = 0
             for link in discovered:
@@ -205,12 +212,10 @@ class P4NScraper:
                     last_date = self.existing_df[self.existing_df['p4n_id'].astype(str) == p_id]['last_scraped'].iloc[0]
                     if pd.notnull(last_date) and (datetime.now() - last_date) < timedelta(days=STALENESS_DAYS):
                         is_stale = False
-                
                 if is_stale or self.is_dev: queue.append(link)
                 else: skipped_count += 1
 
-            print(f"⏭️  [TTL] Skipped {skipped_count} (Fresh). Processing {len(queue)} (Stale)...\n")
-
+            print(f"🔍 Found {len(discovered)} items. TTL skip: {skipped_count}. Processing: {len(queue)}\n")
             for i, link in enumerate(queue, 1):
                 await self.extract_atomic(page, link, i, len(queue))
             
@@ -222,9 +227,7 @@ class P4NScraper:
         new_df = pd.DataFrame(self.processed_batch)
         final_df = pd.concat([new_df, self.existing_df], ignore_index=True)
         final_df['last_scraped'] = pd.to_datetime(final_df['last_scraped'])
-        # Keep newest scrape based on 30-day TTL logic
         final_df.sort_values('last_scraped', ascending=False).drop_duplicates('p4n_id').to_csv(self.csv_file, index=False)
-        print(f"\n🚀 [FINISH] Saved {len(self.processed_batch)} records.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
