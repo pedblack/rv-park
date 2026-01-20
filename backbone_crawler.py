@@ -81,7 +81,8 @@ class P4NScraper:
     def __init__(self, is_dev=False):
         self.is_dev = is_dev
         self.csv_file = DEV_CSV if is_dev else PROD_CSV
-        self.current_max_reviews = 5 if is_dev else MAX_REVIEWS 
+        # self.current_max_reviews = 5 if is_dev else MAX_REVIEWS 
+        self.current_max_reviews = MAX_REVIEWS 
         self.discovery_links = []
         self.processed_batch = []
         self.existing_df = self._load_existing()
