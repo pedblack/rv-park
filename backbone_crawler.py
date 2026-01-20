@@ -137,7 +137,6 @@ class P4NScraper:
 
     async def analyze_with_ai(self, raw_data):
         self.stats["gemini_calls"] += 1
-        # --- UPDATED PROMPT AS REQUESTED ---
         system_instruction = (
             "Analyze the provided property data and reviews. Return JSON ONLY. "
             "If reviews < 5, return null for occupancy_analysis. Use snake_case.\n\n"
@@ -175,8 +174,14 @@ class P4NScraper:
         try:
             await asyncio.sleep(AI_DELAY) 
             response = await client.aio.models.generate_content(model=MODEL_NAME, contents=f"ANALYZE:\n{json_payload}", config=config)
-            return json.loads(response.text)
-        except: return {}
+            
+            ai_json = json.loads(response.text)
+            PipelineLogger.log_event("GEMINI_RESPONSE", ai_json)
+            
+            return ai_json
+        except Exception as e:
+            PipelineLogger.log_event("GEMINI_ERROR", {"error": str(e), "raw_response": getattr(response, 'text', 'N/A')})
+            return {}
 
     async def extract_atomic(self, page, url, current_num, total_num):
         print(f"➡️  [{current_num}/{total_num}] Scraped Item: {url}")
