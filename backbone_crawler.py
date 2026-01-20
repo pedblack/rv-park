@@ -17,11 +17,11 @@ PROD_CSV = "backbone_locations.csv"
 DEV_CSV = "backbone_locations_dev.csv"
 LOG_FILE = "pipeline_execution.log"
 
-# --- NEW ADAPTED SETTINGS ---
-AI_DELAY = 1.5               # Increased to balance 300 RPM quota
-STALENESS_DAYS = 30          # Properties updated within 30 days are skipped
-MIN_REVIEWS_THRESHOLD = 3    # Skip properties with fewer than this many reviews
-DEV_LIMIT = 1                # Strict limit for --dev runs
+# --- ADAPTED SETTINGS ---
+AI_DELAY = 1.5               
+STALENESS_DAYS = 30          
+MIN_REVIEWS_THRESHOLD = 3    
+DEV_LIMIT = 1                
 
 # --- PARTITION SETTINGS ---
 URL_LIST_FILE = "url_list.txt"   
@@ -83,8 +83,10 @@ class P4NScraper:
     def __init__(self, is_dev=False):
         self.is_dev = is_dev
         self.csv_file = DEV_CSV if is_dev else PROD_CSV
-        self.processed_batch = [] # RE-ADDED: Missing attribute fix
+        self.processed_batch = []
         self.existing_df = self._load_existing()
+        # --- TRACKING STATS ---
+        self.stats = {"read": 0, "discarded_fresh": 0, "discarded_low_feedback": 0}
 
     def _load_existing(self):
         if os.path.exists(self.csv_file):
@@ -112,57 +114,51 @@ class P4NScraper:
         except: print("❌ [LOGIN] Failed")
 
     async def analyze_with_ai(self, raw_data):
-        """Unified Bulk Analysis of up to 1,000+ reviews in a single prompt."""
         system_instruction = (
-            "You are a property analyst. Analyze all data provided and return JSON ONLY. "
-            "Schema: { "
-            "'parking_min': float, 'parking_max': float, 'electricity_eur': float, "
-            "'pros': [ {'topic': 'string', 'count': int} ], "
-            "'cons': [ {'topic': 'string', 'count': int} ], "
-            "'languages': [ {'lang': 'string', 'count': int} ] "
-            "}. "
-            "1. List 'pros', 'cons', and 'languages' by recurrence frequency (highest count first). "
-            "2. 'count' is the total mentions of that theme or language across ALL reviews provided. "
-            "3. Topics must be succinctly summarized (3-5 words max)."
+            "Analyze data and return JSON ONLY. "
+            "Schema: { 'parking_min': float, 'parking_max': float, 'electricity_eur': float, "
+            "'pros': [ {'topic': 'string', 'count': int} ], 'cons': [ {'topic': 'string', 'count': int} ], "
+            "'languages': [ {'lang': 'string', 'count': int} ] }. "
+            "List by recurrence frequency. Topics 3-5 words max."
         )
         json_payload = json.dumps(raw_data, default=str, ensure_ascii=False)
         config = types.GenerateContentConfig(response_mime_type="application/json", temperature=0.1, system_instruction=system_instruction)
         try:
             await asyncio.sleep(AI_DELAY) 
-            response = await client.aio.models.generate_content(model=MODEL_NAME, contents=f"ANALYZE BATCH:\n{json_payload}", config=config)
+            response = await client.aio.models.generate_content(model=MODEL_NAME, contents=f"ANALYZE:\n{json_payload}", config=config)
             return json.loads(response.text)
         except: return {}
 
     async def extract_atomic(self, page, url, current_num, total_num):
         print(f"➡️  [{current_num}/{total_num}] Scraping: {url}")
+        self.stats["read"] += 1
         try:
             await page.goto(url, wait_until="domcontentloaded")
             
-            # --- PRE-FILTER: MIN REVIEWS CHECK ---
+            # --- MIN REVIEWS CHECK ---
             stats_container = page.locator(".place-feedback-average")
             raw_count_text = await stats_container.locator("strong").inner_text()
             count_match = re.search(r'(\d+)', raw_count_text)
             actual_feedback_count = int(count_match.group(1)) if count_match else 0
             
             if actual_feedback_count < MIN_REVIEWS_THRESHOLD:
-                print(f"⏭️  Skipping: Only {actual_feedback_count} reviews (Threshold: {MIN_REVIEWS_THRESHOLD})")
+                print(f"🗑️  [DISCARD] Insufficient feedback ({actual_feedback_count} reviews). Required: {MIN_REVIEWS_THRESHOLD}")
+                self.stats["discarded_low_feedback"] += 1
                 return
 
             p_id = await page.locator("body").get_attribute("data-place-id") or url.split("/")[-1]
             title = (await page.locator("h1").first.inner_text()).split('\n')[0].strip()
             
-            # Coordinates
+            # Coordinates/Rating/Review collection...
             lat, lng = 0.0, 0.0
             coord_link = await page.locator("a[href*='lat='][href*='lng=']").first.get_attribute("href")
             if coord_link:
                 m = re.search(r'lat=([-+]?\d*\.\d+|\d+)&lng=([-+]?\d*\.\d+|\d+)', coord_link)
                 if m: lat, lng = float(m.group(1)), float(m.group(2))
 
-            # Rating
             raw_rate = await stats_container.locator(".text-gray").inner_text()
             avg_rating = float(re.search(r'(\d+\.?\d*)', raw_rate).group(1)) if re.search(r'(\d+\.?\d*)', raw_rate) else 0.0
 
-            # Extraction of ALL hidden reviews
             review_els = await page.locator(".place-feedback-article-content").all()
             reviews_text = [await r.text_content() for r in review_els]
 
@@ -170,11 +166,10 @@ class P4NScraper:
                 "p4n_id": p_id,
                 "parking_cost": await self._get_dl(page, "Parking cost"),
                 "services_cost": await self._get_dl(page, "Price of services"),
-                "all_reviews": reviews_text # Bulk reviews sent in one call
+                "all_reviews": reviews_text 
             }
             
             ai_data = await self.analyze_with_ai(raw_payload)
-            
             row = {
                 "p4n_id": p_id, "title": title, "url": url, "latitude": lat, "longitude": lng,
                 "total_reviews": actual_feedback_count, "avg_rating": avg_rating,
@@ -218,12 +213,9 @@ class P4NScraper:
 
             discovered = list(set(discovery_links))
             queue = []
-            skipped_count = 0
             
             for link in discovered:
-                # --- FIXED DEV LIMIT ---
                 if self.is_dev and len(queue) >= DEV_LIMIT: break
-
                 p_id = link.split("/")[-1]
                 is_stale = True
                 if not self.existing_df.empty and p_id in self.existing_df['p4n_id'].astype(str).values:
@@ -232,14 +224,25 @@ class P4NScraper:
                         is_stale = False
                 
                 if is_stale: queue.append(link)
-                else: skipped_count += 1
+                else: 
+                    print(f"🗑️  [DISCARD] Skipping {p_id}: Already updated within {STALENESS_DAYS} days.")
+                    self.stats["discarded_fresh"] += 1
 
-            print(f"🔍 Found {len(discovered)} items. TTL skip: {skipped_count}. Processing: {len(queue)}\n")
+            print(f"🔍 Found {len(discovered)} items. TTL skips: {self.stats['discarded_fresh']}. Stale items: {len(queue)}\n")
             for i, link in enumerate(queue, 1):
                 await self.extract_atomic(page, link, i, len(queue))
             
             await browser.close()
             self._upsert_and_save()
+            
+            # --- FINAL LOG SUMMARY ---
+            print(f"\n🏁 [RUN SUMMARY]")
+            print(f"🔹 Total properties identified: {len(discovered)}")
+            print(f"🔹 Scrape attempts (stale): {self.stats['read']}")
+            print(f"🔹 Discarded (Fresh < 30d): {self.stats['discarded_fresh']}")
+            print(f"🔹 Discarded (Low Feedback): {self.stats['discarded_low_feedback']}")
+            print(f"🚀 Refreshed Database: {len(self.processed_batch)} new records.")
+
             if not self.is_dev: DailyQueueManager.increment_state()
 
     def _upsert_and_save(self):
