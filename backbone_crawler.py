@@ -18,10 +18,11 @@ PROD_CSV = "backbone_locations.csv"
 DEV_CSV = "backbone_locations_dev.csv"
 LOG_FILE = "pipeline_execution.log"
 AI_DELAY = 0.5               
+STALENESS_DAYS = 30          # Properties updated within 30 days are skipped
 
 # --- PARTITION SETTINGS ---
-URL_LIST_FILE = "url_list.txt"   # List of 30 Search URLs
-STATE_FILE = "queue_state.json"  # Tracking cursor
+URL_LIST_FILE = "url_list.txt"   
+STATE_FILE = "queue_state.json"  
 
 # --- SYSTEM SETTINGS ---
 GEMINI_API_KEY = os.environ.get("GOOGLE_API_KEY")
@@ -29,48 +30,36 @@ P4N_USER = os.environ.get("P4N_USERNAME")
 P4N_PASS = os.environ.get("P4N_PASSWORD") 
 
 class DailyQueueManager:
-    """Manages the 30-day rolling cycle logic."""
+    """Manages sequential search rotation."""
     @staticmethod
     def get_next_partition():
         if not os.path.exists(URL_LIST_FILE):
             return [], 0, 0
-        
         with open(URL_LIST_FILE, 'r') as f:
             urls = [line.strip() for line in f if line.strip()]
-        
         state = {"current_index": 0}
         if os.path.exists(STATE_FILE):
             try:
                 with open(STATE_FILE, 'r') as f: state = json.load(f)
             except: pass
-
         idx = state.get("current_index", 0)
         if idx >= len(urls): idx = 0
-        
         target_url = urls[idx]
-        
-        # Update state for next time
         state["current_index"] = idx + 1
         with open(STATE_FILE, 'w') as f: json.dump(state, f)
-            
         return [target_url], idx + 1, len(urls)
 
 class PipelineLogger:
     @staticmethod
     def log_event(event_type, data):
-        """Saves formatted JSON events with Unicode support and un-escaping."""
+        """Saves formatted JSON events with Unicode support."""
         processed_content = {}
         for k, v in data.items():
             if isinstance(v, str) and (v.strip().startswith('{') or v.strip().startswith('[')):
                 try: processed_content[k] = json.loads(v)
                 except: processed_content[k] = v
             else: processed_content[k] = v
-
-        log_entry = {
-            "timestamp": datetime.now().isoformat(),
-            "type": event_type,
-            "content": processed_content
-        }
+        log_entry = {"timestamp": datetime.now().isoformat(), "type": event_type, "content": processed_content}
         with open(LOG_FILE, "a", encoding="utf-8") as f:
             header = f"\n{'='*30} {event_type} {'='*30}\n"
             f.write(header + json.dumps(log_entry, indent=4, default=str, ensure_ascii=False) + "\n")
@@ -81,8 +70,7 @@ class P4NScraper:
     def __init__(self, is_dev=False):
         self.is_dev = is_dev
         self.csv_file = DEV_CSV if is_dev else PROD_CSV
-        # self.current_max_reviews = 5 if is_dev else MAX_REVIEWS 
-        self.current_max_reviews = MAX_REVIEWS 
+        self.current_max_reviews = 5 if is_dev else MAX_REVIEWS 
         self.discovery_links = []
         self.processed_batch = []
         self.existing_df = self._load_existing()
@@ -91,14 +79,15 @@ class P4NScraper:
         if os.path.exists(self.csv_file):
             try:
                 df = pd.read_csv(self.csv_file)
-                df['last_scraped'] = pd.to_datetime(df['last_scraped'])
+                # Ensure date format is handled correctly
+                df['last_scraped'] = pd.to_datetime(df['last_scraped'], errors='coerce')
                 return df
             except: pass
         return pd.DataFrame()
 
     async def login(self, page):
         if not P4N_USER or not P4N_PASS: return
-        print(f"🔐 Attempting Login...")
+        print(f"🔐 Logging in...")
         try:
             await page.click(".pageHeader-account-button")
             await asyncio.sleep(2)
@@ -196,13 +185,9 @@ class P4NScraper:
             except: pass
             await self.login(page)
 
-            # --- START DAILY CYCLE LOGGING ---
+            # Pick today's geographical partition
             target_urls, current_idx, total_idx = DailyQueueManager.get_next_partition()
-            PipelineLogger.log_event("DAILY_CYCLE_START", {
-                "current_partition": current_idx,
-                "total_partitions": total_idx,
-                "target_url": target_urls[0] if target_urls else "DEFAULT_SEARCH"
-            })
+            PipelineLogger.log_event("DAILY_CYCLE_START", {"partition": f"{current_idx}/{total_idx}", "url": target_urls[0]})
 
             for url in target_urls:
                 await page.goto(url, wait_until="networkidle")
@@ -212,7 +197,28 @@ class P4NScraper:
                     if href:
                         self.discovery_links.append(f"https://park4night.com{href}" if href.startswith("/") else href)
 
-            queue = list(set(self.discovery_links))
+            # --- STALENESS FILTERING ---
+            queue = []
+            for link in list(set(self.discovery_links)):
+                m = re.search(r'/place/(\d+)', link)
+                if not m: continue
+                p_id = str(m.group(1))
+
+                # Check if we already have a recent scrape for this ID
+                is_stale = True
+                if not self.existing_df.empty and p_id in self.existing_df['p4n_id'].astype(str).values:
+                    # Filter for the row and get the timestamp
+                    last_date = self.existing_df[self.existing_df['p4n_id'].astype(str) == p_id]['last_scraped'].iloc[0]
+                    # If scraped within the last 30 days, skip
+                    if pd.notnull(last_date) and (datetime.now() - last_date) < timedelta(days=STALENESS_DAYS):
+                        is_stale = False
+                
+                if is_stale or self.is_dev:
+                    queue.append(link)
+                else:
+                    print(f"⏭️ Skipping {p_id}: Already updated within {STALENESS_DAYS} days.")
+
+            print(f"⚡ Processing {len(queue)} stale items...")
             for link in queue:
                 await self.extract_atomic(page, link)
             
@@ -224,7 +230,7 @@ class P4NScraper:
         new_df = pd.DataFrame(self.processed_batch)
         final_df = pd.concat([new_df, self.existing_df], ignore_index=True)
         final_df['last_scraped'] = pd.to_datetime(final_df['last_scraped'])
-        # Drop duplicates, keeping today's data as the "fresh" record.
+        # Drop duplicates by keeping only the most recent run
         final_df.sort_values('last_scraped', ascending=False).drop_duplicates('p4n_id').to_csv(self.csv_file, index=False)
         print(f"🚀 Success! Updated {self.csv_file}")
 
