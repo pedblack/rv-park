@@ -3,6 +3,7 @@ import folium
 from folium.plugins import MarkerCluster
 import os
 import json
+import numpy as np
 
 CSV_FILE = os.environ.get("CSV_FILE", "backbone_locations.csv")
 
@@ -20,40 +21,67 @@ def generate_map():
 
     # Center on Alentejo
     m = folium.Map(location=[38.5, -7.9], zoom_start=9, tiles="cartodbpositron")
-    
     marker_cluster = MarkerCluster(name="Properties", control=False).add_to(m)
 
     prop_types = sorted(df_clean['location_type'].unique().tolist())
 
     for _, row in df_clean.iterrows():
+        # --- ROBUST VALUE PARSING ---
+        def clean_int(val):
+            try:
+                if pd.isna(val) or val == "": return 0
+                return int(float(val))
+            except: return 0
+
         def format_list(text):
             if pd.isna(text) or text == "N/A" or not str(text).strip(): return "<li>None</li>"
             return "".join([f"<li>{item.strip()}</li>" for item in str(text).split(";")])
 
+        num_places = clean_int(row.get('num_places', 0))
+        intensity = float(row.get('intensity_index', 0)) if not pd.isna(row.get('intensity_index')) else 0
+        
+        # Color logic for Intensity Bar
+        bar_color = "#28a745" if intensity < 4 else "#fd7e14" if intensity < 8 else "#dc3545"
+
         popup_html = f"""
-        <div style="font-family: Arial, sans-serif; width: 300px; line-height: 1.6; font-size: 14px; color: #333;">
+        <div style="font-family: Arial, sans-serif; width: 320px; line-height: 1.6; font-size: 14px; color: #333;">
             <h3 style="margin: 0 0 10px 0; font-size: 18px; color: #2c3e50; border-bottom: 3px solid #27d9a1;">{row['title']}</h3>
+            
             <div style="margin-bottom: 12px; font-weight: bold; font-size: 15px; color: #7f8c8d;">
-                📍 {row['location_type']} | 🚗 {row['num_places']} spots
+                📍 {row['location_type']} | 🚗 {num_places} spots
             </div>
+
+            <div style="margin-bottom: 15px;">
+                <div style="display:flex; justify-content: space-between; font-size: 12px; margin-bottom: 3px;">
+                    <b>Occupancy Intensity:</b> <span>{intensity}/10</span>
+                </div>
+                <div style="width: 100%; background: #eee; border-radius: 10px; height: 8px;">
+                    <div style="width: {intensity*10}%; background: {bar_color}; height: 8px; border-radius: 10px;"></div>
+                </div>
+            </div>
+
             <div style="background: #f1f3f5; padding: 10px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #dee2e6;">
-                <table style="width: 100%; font-size: 15px;">
-                    <tr><td>💰 <b>Min:</b></td><td style="text-align: right;">{row['parking_min_eur']}€</td></tr>
-                    <tr><td>⚡ <b>Elec:</b></td><td style="text-align: right;">{row['electricity_eur']}€</td></tr>
+                <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
+                    <tr><td>💰 <b>Min:</b></td><td style="text-align: right;">{row.get('parking_min_eur', 0)}€</td></tr>
+                    <tr><td>⚡ <b>Elec:</b></td><td style="text-align: right;">{row.get('electricity_eur', 0)}€</td></tr>
+                    <tr><td>🕒 <b>Arrival:</b></td><td style="text-align: right; color: #e67e22;"><b>{row.get('arrival_window', 'anytime')}</b></td></tr>
+                    <tr><td>📅 <b>Booking:</b></td><td style="text-align: right;">{'Required' if row.get('booking_required') == True else 'Not needed'}</td></tr>
                 </table>
             </div>
-            <div style="font-size: 14px;">
-                <b style="color: #27ae60;">Pros:</b> <ul style="margin:5px 0; padding-left:20px;">{format_list(row['ai_pros'])}</ul>
-                <b style="color: #e74c3c;">Cons:</b> <ul style="margin:5px 0; padding-left:20px;">{format_list(row['ai_cons'])}</ul>
+
+            <div style="font-size: 13px; margin-bottom: 10px;">
+                <b style="color: #27ae60;">Pros:</b> <ul style="margin:2px 0; padding-left:18px;">{format_list(row.get('ai_pros'))}</ul>
+                <b style="color: #e74c3c;">Cons:</b> <ul style="margin:2px 0; padding-left:18px;">{format_list(row.get('ai_cons'))}</ul>
             </div>
-            <div style="padding-top: 10px; border-top: 1px solid #eee; font-size: 13px;">
-                ⭐ <b>{row['avg_rating']}</b> / 5 ({row['total_reviews']} reviews)
+
+            <div style="font-size: 12px; color: #7f8c8d; margin-bottom: 10px;">
+                <b>Drivers:</b> {row.get('demand_drivers', 'None noted')}
             </div>
-            <a href="{row['url']}" target="_blank" style="display: block; margin-top: 15px; text-align: center; background: #27d9a1; color: white; padding: 12px; border-radius: 6px; text-decoration: none; font-weight: bold;">View on Park4Night</a>
+
+            <a href="{row['url']}" target="_blank" style="display: block; text-align: center; background: #27d9a1; color: white; padding: 10px; border-radius: 6px; text-decoration: none; font-weight: bold;">View on Park4Night</a>
         </div>
         """
 
-        # Icon logic
         icon_color = 'green' if row['avg_rating'] >= 4 else 'orange' if row['avg_rating'] >= 3 else 'red'
 
         marker = folium.Marker(
@@ -63,14 +91,14 @@ def generate_map():
             tooltip=f"{row['title']} ({row['avg_rating']}⭐)"
         )
         
-        # Data binding for JS
+        # KEY FIX: Using clean_int to prevent ValueError
         marker.options['data_rating'] = float(row['avg_rating'])
         marker.options['data_reviews'] = int(row['total_reviews'])
-        marker.options['data_places'] = int(row.get('num_places', 0))
+        marker.options['data_places'] = num_places
         marker.options['data_type'] = str(row['location_type'])
         marker.add_to(marker_cluster)
 
-    # --- HTML UI ELEMENTS (Legend & Filter Panel) ---
+    # --- LEGEND & FILTER PANEL ---
     filter_html = f"""
     <style>
         .map-overlay {{ font-family: sans-serif; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); border: 1px solid #eee; }}
@@ -96,13 +124,8 @@ def generate_map():
         </div>
         
         <div style="margin-bottom:15px;">
-            <label style="font-size:13px; font-weight:bold;">Min Reviews: <span id="val-reviews" style="color:#27d9a1">0</span></label>
-            <input type="range" id="filter-reviews" min="0" max="500" step="5" value="0" oninput="document.getElementById('val-reviews').innerText = this.value" style="width:100%;">
-        </div>
-
-        <div style="margin-bottom:15px;">
             <label style="font-size:13px; font-weight:bold;">Min Places: <span id="val-places" style="color:#27d9a1">0</span></label>
-            <input type="range" id="filter-places" min="0" max="200" step="10" value="0" oninput="document.getElementById('val-places').innerText = this.value" style="width:100%;">
+            <input type="range" id="filter-places" min="0" max="100" step="5" value="0" oninput="document.getElementById('val-places').innerText = this.value" style="width:100%;">
         </div>
         
         <div style="margin-bottom:20px;">
@@ -122,32 +145,24 @@ def generate_map():
 
     function applyFilters() {{
         const minRate = parseFloat(document.getElementById('filter-rating').value);
-        const minRev = parseInt(document.getElementById('filter-reviews').value);
         const minPlc = parseInt(document.getElementById('filter-places').value);
         const type = document.getElementById('filter-type').value;
 
-        var mapObj = null;
         var clusterGroup = null;
-
         for (let key in window) {{
-            if (window[key] instanceof L.Map) mapObj = window[key];
             if (window[key] instanceof L.MarkerClusterGroup) clusterGroup = window[key];
         }}
 
-        if (!mapObj || !clusterGroup) return;
-
-        if (!allMarkersBackup) {{
-            allMarkersBackup = clusterGroup.getLayers();
-        }}
+        if (!clusterGroup) return;
+        if (!allMarkersBackup) allMarkersBackup = clusterGroup.getLayers();
 
         clusterGroup.clearLayers();
 
         const filtered = allMarkersBackup.filter(m => {{
             const r = m.options.data_rating || 0;
-            const rev = m.options.data_reviews || 0;
             const plc = m.options.data_places || 0;
             const t = m.options.data_type || "";
-            return r >= minRate && rev >= minRev && plc >= minPlc && (type === "All" || t === type);
+            return r >= minRate && plc >= minPlc && (type === "All" || t === type);
         }});
 
         clusterGroup.addLayers(filtered);
@@ -155,9 +170,8 @@ def generate_map():
     </script>
     """
     m.get_root().html.add_child(folium.Element(filter_html))
-
-    m.save("portugal_land_map.html")
-    print("🚀 Map generated with Places Filter and Legend.")
+    m.save("index.html")
+    print("🚀 Map updated with Intensity Bars and error fixes.")
 
 if __name__ == "__main__":
     generate_map()
