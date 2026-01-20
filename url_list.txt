@@ -1,0 +1,2 @@
+https://park4night.com/en/search?lat=37.6365&lng=-8.6385&z=10
+https://park4night.com/en/search?lat=37.8785&lng=-8.5686&z=10
