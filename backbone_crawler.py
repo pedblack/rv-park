@@ -32,34 +32,20 @@ TARGET_URLS = [
 class PipelineLogger:
     @staticmethod
     def log_event(event_type, data):
-        """Saves deeply formatted JSON events to the log file for maximum readability."""
         processed_content = {}
         for k, v in data.items():
             if isinstance(v, str) and (v.strip().startswith('{') or v.strip().startswith('[')):
-                try:
-                    processed_content[k] = json.loads(v)
-                except:
-                    processed_content[k] = v
-            else:
-                processed_content[k] = v
+                try: processed_content[k] = json.loads(v)
+                except: processed_content[k] = v
+            else: processed_content[k] = v
 
-        log_entry = {
-            "timestamp": datetime.now().isoformat(),
-            "type": event_type,
-            "content": processed_content
-        }
-        
+        log_entry = {"timestamp": datetime.now().isoformat(), "type": event_type, "content": processed_content}
         with open(LOG_FILE, "a", encoding="utf-8") as f:
             header = f"\n{'='*30} {event_type} {'='*30}\n"
             pretty_json = json.dumps(log_entry, indent=4, default=str, ensure_ascii=False)
             f.write(header + pretty_json + "\n")
 
-    @staticmethod
-    async def save_screenshot(page, name):
-        path = f"debug_{name}_{datetime.now().strftime('%H%M%S')}.png"
-        await page.screenshot(path=path)
-        print(f"📸 DEBUG: Screenshot saved: {path}")
-
+# Initialize Client
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 class P4NScraper:
@@ -81,59 +67,33 @@ class P4NScraper:
         return pd.DataFrame()
 
     async def login(self, page):
-        """Reliable login with simulated human typing speed."""
         if not P4N_USER or not P4N_PASS: return
         print(f"🔐 Attempting Login for {P4N_USER}...")
         try:
             await page.click(".pageHeader-account-button")
             await asyncio.sleep(2)
             await page.click(".pageHeader-account-dropdown >> text='Login'", force=True)
-            
-            user_input = page.locator("#signinUserId")
-            await user_input.wait_for(state="visible")
-            await user_input.focus()
-            
-            await user_input.type(P4N_USER, delay=random.randint(150, 250))
-            await asyncio.sleep(random.uniform(0.5, 1.0))
-            
-            pass_input = page.locator("#signinPassword")
-            await pass_input.focus()
-            await pass_input.type(P4N_PASS, delay=random.randint(150, 250))
-            
-            submit_btn = page.locator(".modal-footer button[type='submit']:has-text('Login')")
-            await submit_btn.click(force=True)
-            
+            await page.wait_for_selector("#signinUserId", state="visible")
+            await page.type("#signinUserId", P4N_USER, delay=random.randint(150, 300))
+            await page.type("#signinPassword", P4N_PASS, delay=random.randint(150, 300))
+            await page.click(".modal-footer button[type='submit']:has-text('Login')", force=True)
             await page.wait_for_load_state("networkidle")
             await asyncio.sleep(5) 
-
-            user_span = page.locator(".pageHeader-account-button span")
-            actual_username = await user_span.inner_text()
-            
-            if P4N_USER.lower() in actual_username.lower():
-                print(f"✅ Logged in as: {actual_username}")
-                PipelineLogger.log_event("LOGIN_SUCCESS", {"user": actual_username})
-            else:
-                print(f"⚠️ Verification Failed. Found: '{actual_username}'")
-                await PipelineLogger.save_screenshot(page, "login_verify_failed")
-        except Exception as e:
-            print(f"❌ Login UI Error: {e}")
-            PipelineLogger.log_event("LOGIN_ERROR", {"error": str(e)})
+        except Exception: pass
 
     async def analyze_with_ai(self, raw_data):
-        """AI analysis with strict JSON schema and detailed prompt logging."""
+        """Refined AI prompting for precise pricing and short summaries."""
         system_instruction = (
-            "You are a property data analyst. Analyze the provided reviews and return a JSON object with this schema: "
-            "{ 'parking_min': integer_price_in_eur, 'pros': 'summary_string', 'cons': 'summary_string' }. "
-            "If no price is mentioned, set parking_min to 0. Summarize reviews into concise English pros and cons."
+            "You are a property data analyst. Analyze data and return JSON ONLY. "
+            "Schema: { 'parking_min': float, 'parking_max': float, 'electricity_eur': float, 'pros': 'string', 'cons': 'string' }. "
+            "1. Extract prices from 'parking_cost' (e.g., '13,5€ - 28€' -> min: 13.5, max: 28.0). "
+            "2. Extract electricity cost from 'services_cost'. Set to 0 if not found. "
+            "3. Summaries for 'pros' and 'cons' MUST be extremely succinct (3-5 words max). "
+            "Example: pros: 'Modern toilets, shady spots', cons: 'Expensive, early pool closure'."
         )
         
         json_payload = json.dumps(raw_data, default=str, ensure_ascii=False)
-        
-        PipelineLogger.log_event("AI_REQUEST", {
-            "p4n_id": raw_data.get("p4n_id"),
-            "system_instruction": system_instruction,
-            "final_full_prompt": f"DATA TO ANALYZE:\n{json_payload}"
-        })
+        PipelineLogger.log_event("AI_REQUEST", {"p4n_id": raw_data.get("p4n_id"), "final_prompt": json_payload})
 
         config = types.GenerateContentConfig(
             response_mime_type="application/json", 
@@ -144,9 +104,7 @@ class P4NScraper:
         try:
             await asyncio.sleep(AI_DELAY) 
             response = await client.aio.models.generate_content(
-                model=MODEL_NAME, 
-                contents=f"DATA TO ANALYZE:\n{json_payload}", 
-                config=config
+                model=MODEL_NAME, contents=f"ANALYZE:\n{json_payload}", config=config
             )
             PipelineLogger.log_event("AI_RESPONSE", {"res": response.text})
             return json.loads(response.text)
@@ -161,74 +119,71 @@ class P4NScraper:
             p_id = await page.locator("body").get_attribute("data-place-id") or url.split("/")[-1]
             title = (await page.locator("h1").first.inner_text()).split('\n')[0].strip()
             
-            # --- COORDINATE EXTRACTION ---
+            # --- COORDINATES ---
             lat, lng = 0.0, 0.0
             coord_link = await page.locator("a[href*='lat='][href*='lng=']").first.get_attribute("href")
             if coord_link:
-                lat_match = re.search(r'lat=([-+]?\d*\.\d+|\d+)', coord_link)
-                lng_match = re.search(r'lng=([-+]?\d*\.\d+|\d+)', coord_link)
-                if lat_match and lng_match:
-                    lat, lng = float(lat_match.group(1)), float(lng_match.group(1))
+                m = re.search(r'lat=([-+]?\d*\.\d+|\d+)&lng=([-+]?\d*\.\d+|\d+)', coord_link)
+                if m: lat, lng = float(m.group(1)), float(m.group(2))
 
-            # --- RATING & REVIEW COUNT EXTRACTION ---
-            total_reviews = 0
-            avg_rating = 0.0
+            # --- RATING STATS ---
+            total_reviews, avg_rating = 0, 0.0
             try:
-                stats_container = page.locator(".place-feedback-average")
-                raw_count_text = await stats_container.locator("strong").inner_text()
-                raw_rating_text = await stats_container.locator(".text-gray").inner_text()
-                
-                # Extract 193 from "Average (193 Feedback)"
-                count_match = re.search(r'(\d+)', raw_count_text)
-                if count_match: total_reviews = int(count_match.group(1))
-                
-                # Extract 3.82 from "3.82/5"
-                rating_match = re.search(r'(\d+\.?\d*)', raw_rating_text)
-                if rating_match: avg_rating = float(rating_match.group(1))
-            except Exception as e:
-                print(f"⚠️ Rating extraction failed: {e}")
+                raw_count = await page.locator(".place-feedback-average strong").inner_text()
+                raw_rate = await page.locator(".place-feedback-average .text-gray").inner_text()
+                total_reviews = int(re.search(r'(\d+)', raw_count).group(1))
+                avg_rating = float(re.search(r'(\d+\.?\d*)', raw_rate).group(1))
+            except: pass
 
-            # --- REVIEW EXPANSION LOOP ---
-            for _ in range(10): 
+            # --- FIELD EXTRACTION ---
+            parking_cost = await self._get_dl(page, "Parking cost")
+            services_cost = await self._get_dl(page, "Price of services")
+
+            # --- REVIEW EXPANSION ---
+            for _ in range(5):
                 reviews = await page.locator(".place-feedback-article-content").all()
                 if len(reviews) >= self.current_max_reviews: break
-                
                 more_btn = page.locator(".place-feedback-pagination button:has-text('More')")
                 if await more_btn.is_visible():
                     await more_btn.click()
-                    await asyncio.sleep(random.uniform(1.5, 2.5))
+                    await asyncio.sleep(2)
                 else: break
 
             review_els = await page.locator(".place-feedback-article-content").all()
             raw_payload = {
                 "p4n_id": p_id,
+                "parking_cost": parking_cost,
+                "services_cost": services_cost,
                 "reviews": [await r.text_content() for r in review_els[:self.current_max_reviews]]
             }
+            
             ai_data = await self.analyze_with_ai(raw_payload)
 
             row = {
                 "p4n_id": p_id, "title": title, "url": url,
                 "latitude": lat, "longitude": lng,
-                "total_reviews": total_reviews,
-                "avg_rating": avg_rating,
+                "total_reviews": total_reviews, "avg_rating": avg_rating,
                 "parking_min_eur": ai_data.get("parking_min", 0),
+                "parking_max_eur": ai_data.get("parking_max", 0),
+                "electricity_eur": ai_data.get("electricity_eur", 0),
                 "ai_pros": ai_data.get("pros", "N/A"),
                 "ai_cons": ai_data.get("cons", "N/A"),
                 "last_scraped": datetime.now()
             }
-            
             PipelineLogger.log_event("STORAGE_ROW", row)
             self.processed_batch.append(row)
-        except Exception as e: 
-            print(f"⚠️ Error {url}: {e}")
+        except Exception as e: print(f"⚠️ Error {url}: {e}")
+
+    async def _get_dl(self, page, label):
+        try: return (await page.locator(f"dt:has-text('{label}') + dd").first.inner_text()).strip()
+        except: return "N/A"
 
     async def start(self):
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
-            context = await browser.new_context(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+            context = await browser.new_context(user_agent="Mozilla/5.0...")
             page = await context.new_page()
             await Stealth().apply_stealth_async(page)
-            
             await page.goto("https://park4night.com/en", wait_until="networkidle")
             try: await page.click(".cc-btn-accept", timeout=3000)
             except: pass
@@ -244,13 +199,12 @@ class P4NScraper:
                             self.discovery_links.append(f"https://park4night.com{href}" if href.startswith("/") else href)
                         if self.is_dev and len(self.discovery_links) >= 1: break
                 except: pass
-                if self.is_dev and len(self.discovery_links) >= 1: break
 
             queue = []
             for link in list(set(self.discovery_links)):
-                match = re.search(r'/place/(\d+)', link)
-                if not match: continue
-                p_id = match.group(1)
+                m = re.search(r'/place/(\d+)', link)
+                if not m: continue
+                p_id = m.group(1)
                 if self.is_dev:
                     queue.append(link)
                     break
@@ -260,7 +214,6 @@ class P4NScraper:
                     if (datetime.now() - last_date) < timedelta(days=7): is_stale = False
                 if is_stale: queue.append(link)
 
-            print(f"⚡ Processing {len(queue)} items...")
             for link in queue:
                 await self.extract_atomic(page, link)
             
@@ -273,7 +226,6 @@ class P4NScraper:
         final_df = pd.concat([new_df, self.existing_df], ignore_index=True)
         final_df['last_scraped'] = pd.to_datetime(final_df['last_scraped'])
         final_df.sort_values('last_scraped', ascending=False).drop_duplicates('p4n_id').to_csv(self.csv_file, index=False)
-        print(f"🚀 Success! Updated {self.csv_file}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
