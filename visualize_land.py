@@ -142,4 +142,20 @@ def generate_map():
 
         // Filter from the persistent backup
         const filtered = allMarkersBackup.filter(m => {{
-            const r = m.options.data_rating
+            const r = m.options.data_rating || 0;
+            const plc = m.options.data_places || 0;
+            const t = m.options.data_type || "";
+            return r >= minRate && plc >= minPlc && (type === "All" || t === type);
+        }});
+
+        // Re-add filtered layers to the cluster group
+        clusterGroup.addLayers(filtered);
+    }}
+    </script>
+    """
+    m.get_root().html.add_child(folium.Element(filter_html))
+    m.save("index.html")
+    print("🚀 Map successfully generated: index.html with fixed JS filtering.")
+
+if __name__ == "__main__":
+    generate_map()
