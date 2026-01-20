@@ -32,11 +32,14 @@ TARGET_URLS = [
 class PipelineLogger:
     @staticmethod
     def log_event(event_type, data):
-        log_entry = {
+        """Timestamped JSON logging with datetime safety."""
+        # default=str handles datetime objects by converting them to strings
+        log_entry = json.loads(json.dumps({
             "timestamp": datetime.now().isoformat(),
             "type": event_type,
             "content": data
-        }
+        }, default=str))
+        
         with open(LOG_FILE, "a", encoding="utf-8") as f:
             f.write(json.dumps(log_entry) + "\n")
 
@@ -71,24 +74,36 @@ class P4NScraper:
         return pd.DataFrame()
 
     async def login(self, page):
-        """Targeted login using specific footer submit button from your HTML."""
+        """Resilient login using explicit button targeting and human-like delays."""
         if not P4N_USER or not P4N_PASS: return
         print(f"🔐 Attempting Login for {P4N_USER}...")
         try:
+            # 1. Trigger Modal
             await page.click(".pageHeader-account-button")
-            await asyncio.sleep(1)
+            await asyncio.sleep(2)
             await page.click(".pageHeader-account-dropdown >> text='Login'", force=True)
-
             await page.wait_for_selector("#signinUserId", state="visible")
-            await page.fill("#signinUserId", P4N_USER)
-            await page.fill("#signinPassword", P4N_PASS)
+
+            # 2. Fill inputs with slight random delays to mimic typing
+            await page.type("#signinUserId", P4N_USER, delay=random.randint(50, 150))
+            await page.type("#signinPassword", P4N_PASS, delay=random.randint(50, 150))
             
-            # Target the specific primary button in the footer
-            submit_btn = page.locator(".modal-footer .btn-primary:has-text('Login')")
-            await submit_btn.click()
+            # 3. Click the specific submit button in the modal footer
+            # Using force and a slight delay before clicking
+            submit_btn = page.locator(".modal-footer button[type='submit']:has-text('Login')")
+            await asyncio.sleep(1)
+            await submit_btn.click(force=True)
+            
+            # 4. Wait for Modal to disappear
+            try:
+                await page.wait_for_selector("#signinModal", state="hidden", timeout=12000)
+            except: 
+                print("⚠️ Modal still visible after login attempt.")
             
             await page.wait_for_load_state("networkidle")
-            await asyncio.sleep(3)
+            await asyncio.sleep(5) 
+
+            # 5. Verification
             user_span = page.locator(".pageHeader-account-button span")
             actual_username = await user_span.inner_text()
             
@@ -96,16 +111,18 @@ class P4NScraper:
                 print(f"✅ Logged in as: {actual_username}")
                 PipelineLogger.log_event("LOGIN_SUCCESS", {"user": actual_username})
             else:
-                print(f"⚠️ Verification Failed. Found: '{actual_username}'")
+                print(f"⚠️ Verification Failed. Header shows: '{actual_username}'")
                 await PipelineLogger.save_screenshot(page, "login_verify_failed")
+                PipelineLogger.log_event("LOGIN_FAILURE_AUDIT", {"header_text": actual_username})
         except Exception as e:
             print(f"❌ Login UI Error: {e}")
             await PipelineLogger.save_screenshot(page, "login_error")
             PipelineLogger.log_event("LOGIN_ERROR", {"error": str(e)})
 
     async def analyze_with_ai(self, raw_data):
-        """Atomic AI call with detailed Request/Response logging."""
-        prompt = f"Analyze property data. Return JSON only:\n{json.dumps(raw_data)}"
+        """Atomic AI call with safety for datetime serialization."""
+        json_payload = json.dumps(raw_data, default=str)
+        prompt = f"Analyze property data. Return JSON only:\n{json_payload}"
         
         PipelineLogger.log_event("AI_REQUEST_PROMPT", {
             "p4n_id": raw_data.get("p4n_id"),
@@ -117,7 +134,6 @@ class P4NScraper:
         try:
             await asyncio.sleep(AI_DELAY) 
             response = await client.aio.models.generate_content(model=MODEL_NAME, contents=prompt, config=config)
-            
             PipelineLogger.log_event("AI_RESPONSE_RAW", {"res": response.text})
             return json.loads(response.text)
         except Exception as e:
@@ -150,25 +166,19 @@ class P4NScraper:
         except Exception as e: 
             print(f"⚠️ Error {url}: {e}")
 
-    async def _get_dl(self, page, label):
-        try: return (await page.locator(f"dt:has-text('{label}') + dd").first.inner_text()).strip()
-        except: return "N/A"
-
     async def start(self):
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
-            context = await browser.new_context(user_agent="Mozilla/5.0...")
+            context = await browser.new_context(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
             page = await context.new_page()
             await Stealth().apply_stealth_async(page)
             
-            # Handle cookies and login on home first to establish session
             await page.goto("https://park4night.com/en", wait_until="networkidle")
             try: await page.click(".cc-btn-accept", timeout=3000)
             except: pass
             await self.login(page)
 
             for url in TARGET_URLS:
-                print(f"🔍 Discovery: {url}")
                 try:
                     await page.goto(url, wait_until="networkidle")
                     links = await page.locator("a[href*='/place/']").all()
