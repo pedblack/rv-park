@@ -104,52 +104,72 @@ class P4NScraper:
 
         print(f"🔐 [LOGIN] Attempting for user: {P4N_USER}...")
         try:
-            # 1. Trigger Modal
             await page.click(".pageHeader-account-button")
             await asyncio.sleep(1)
             await page.click(".pageHeader-account-dropdown >> text='Login'", force=True)
-            
-            # 2. Populate Fields
             await page.wait_for_selector("#signinUserId", state="visible", timeout=10000)
+            
             await page.locator("#signinUserId").fill(P4N_USER)
             await page.locator("#signinPassword").fill(P4N_PASS)
             
-            # 3. Force Submission via JS Eval + Enter Fallback
-            print("⏳ [LOGIN] Submitting... Waiting 12s for session update.")
-            submit_btn = page.locator("#signinModal .modal-footer button[type='submit']:has-text('Login')")
-            await submit_btn.evaluate("el => el.click()") # JavaScript-level click
-            await page.keyboard.press("Enter") # Keyboard fallback
+            print("⏳ [LOGIN] Submitting credentials...")
+            submit_selector = "#signinModal .modal-footer button[type='submit']:has-text('Login')"
+            await page.locator(submit_selector).evaluate("el => el.click()")
+            await page.keyboard.press("Enter")
             
             await page.wait_for_load_state("networkidle")
-            await asyncio.sleep(12) 
+            await asyncio.sleep(10)
             
-            # 4. Verification Check
-            account_span = page.locator(".pageHeader-account-button span")
-            found_user = (await account_span.inner_text()).strip()
-            
-            ts = int(datetime.now().timestamp())
-            if P4N_USER.lower() in found_user.lower():
-                print(f"✅ [LOGIN] Verified successfully: {found_user}")
-                await page.screenshot(path=f"login_success_{ts}.png", full_page=True)
-                return True
-            else:
-                print(f"❌ [LOGIN] Validation failed. Found: '{found_user}'")
-                await page.screenshot(path=f"login_failure_{ts}.png", full_page=True)
-                return False
+            try:
+                account_span = page.locator(".pageHeader-account-button span")
+                username_found = (await account_span.inner_text()).strip()
+                if P4N_USER.lower() in username_found.lower():
+                    print(f"✅ [LOGIN] Verified successfully: {username_found}")
+                    await page.screenshot(path=f"login_success_{int(datetime.now().timestamp())}.png", full_page=True)
+                    return True
+            except: pass
 
+            await page.screenshot(path=f"login_failure_{int(datetime.now().timestamp())}.png")
+            return False
         except Exception as e: 
             print(f"❌ [LOGIN] Error: {e}")
-            await page.screenshot(path=f"login_error_{int(datetime.now().timestamp())}.png")
             return False
 
     async def analyze_with_ai(self, raw_data):
         self.stats["gemini_calls"] += 1
+        # --- UPDATED PROMPT AS REQUESTED ---
         system_instruction = (
-            "Analyze data and return JSON ONLY. Schema: { 'parking_min': float, 'parking_max': float, "
-            "'electricity_eur': float, 'num_places': int, 'pros': [ {'topic': 'string', 'count': int} ], "
-            "'cons': [ {'topic': 'string', 'count': int} ], 'languages': [ {'lang': 'string', 'count': int} ] }. "
-            "List by recurrence frequency. Topics 3-5 words max."
+            "Analyze the provided property data and reviews. Return JSON ONLY. "
+            "If reviews < 5, return null for occupancy_analysis. Use snake_case.\n\n"
+            "Schema:\n"
+            "{\n"
+            "  \"num_places\": int,\n"
+            "  \"parking_min\": float,\n"
+            "  \"parking_max\": float,\n"
+            "  \"electricity_eur\": float,\n"
+            "  \"occupancy_analysis\": {\n"
+            "    \"intensity_index\": float,\n"
+            "    \"scarcity_arrival_window\": string,\n"
+            "    \"demand_drivers\": [\"string\"],\n"
+            "    \"booking_required\": boolean\n"
+            "  },\n"
+            "  \"monthly_review_histogram\": { \"YYYY-MM\": int },\n"
+            "  \"pros_cons\": {\n"
+            "    \"pros\": [ {\"topic\": \"string\", \"count\": int} ],\n"
+            "    \"cons\": [ {\"topic\": \"string\", \"count\": int} ]\n"
+            "  }\n"
+            "}\n\n"
+            "Demand Scoring Playbook:\n"
+            "- intensity_index: 0-10. Score 10 for \"completely full/turned away,\" 7 for \"must arrive early,\" 4 for \"busy but accessible,\" 0-2 for \"empty/quiet.\"\n"
+            "- scarcity_arrival_window: Extract median time mentioned (e.g., \"before_15:00\"). If no time is mentioned, return \"anytime\".\n"
+            "- demand_drivers: Tag keywords like [summer_peak, weekend_spike, event_related, transit_hub].\n"
+            "- booking_required: true if reviews mention calling/booking ahead is the only way to get a spot.\n\n"
+            "Instructions:\n"
+            "1. Extract 'num_places' from 'places_count'.\n"
+            "2. Populate the monthly_review_histogram by counting review dates.\n"
+            "3. List Pros/Cons by frequency. Topics must be 3-5 words max."
         )
+
         json_payload = json.dumps(raw_data, default=str, ensure_ascii=False)
         config = types.GenerateContentConfig(response_mime_type="application/json", temperature=0.1, system_instruction=system_instruction)
         try:
@@ -185,28 +205,45 @@ class P4NScraper:
                 m = re.search(r'lat=([-+]?\d*\.\d+|\d+)&lng=([-+]?\d*\.\d+|\d+)', coord_link)
                 if m: lat, lng = float(m.group(1)), float(m.group(2))
 
-            raw_rate = await stats_container.locator(".text-gray").inner_text()
-            avg_rating = float(re.search(r'(\d+\.?\d*)', raw_rate).group(1)) if re.search(r'(\d+\.?\d*)', raw_rate) else 0.0
-            review_els = await page.locator(".place-feedback-article-content").all()
-            reviews_text = [await r.text_content() for r in review_els]
+            # --- STRUCTURED REVIEW DATA ---
+            review_articles = await page.locator(".place-feedback-article").all()
+            formatted_reviews = []
+            for article in review_articles:
+                try:
+                    date_val = await article.locator("time").get_attribute("datetime") or "Unknown"
+                    text_val = await article.locator(".place-feedback-article-content").inner_text()
+                    formatted_reviews.append(f"Review [{date_val}]: {text_val.strip()}")
+                except: continue
 
             raw_payload = {
-                "p4n_id": p_id, "location_type": location_type,
                 "places_count": await self._get_dl(page, "Number of places"),
                 "parking_cost": await self._get_dl(page, "Parking cost"),
                 "services_cost": await self._get_dl(page, "Price of services"),
-                "all_reviews": reviews_text 
+                "all_reviews": formatted_reviews 
             }
+            
             ai_data = await self.analyze_with_ai(raw_payload)
+            
+            occ = ai_data.get("occupancy_analysis") or {}
+            pc = ai_data.get("pros_cons") or {}
+
             row = {
                 "p4n_id": p_id, "title": title, "url": url, "latitude": lat, "longitude": lng,
-                "location_type": location_type, "num_places": ai_data.get("num_places", 0),
-                "total_reviews": actual_feedback_count, "avg_rating": avg_rating,
-                "parking_min_eur": ai_data.get("parking_min", 0), "parking_max_eur": ai_data.get("parking_max", 0),
+                "location_type": location_type, 
+                "num_places": ai_data.get("num_places", 0),
+                "total_reviews": actual_feedback_count, 
+                "avg_rating": float(re.search(r'(\d+\.?\d*)', await stats_container.locator(".text-gray").inner_text()).group(1)),
+                "parking_min_eur": ai_data.get("parking_min", 0),
+                "parking_max_eur": ai_data.get("parking_max", 0),
                 "electricity_eur": ai_data.get("electricity_eur", 0),
-                "ai_pros": "; ".join([f"{p['topic']} ({p['count']})" for p in ai_data.get('pros', [])]),
-                "ai_cons": "; ".join([f"{c['topic']} ({c['count']})" for c in ai_data.get('cons', [])]),
-                "top_languages": "; ".join([f"{l['lang']} ({l['count']})" for l in ai_data.get('languages', [])]),
+                # New Fields
+                "intensity_index": occ.get("intensity_index", 0) if occ else 0,
+                "arrival_window": occ.get("scarcity_arrival_window", "anytime") if occ else "anytime",
+                "booking_required": occ.get("booking_required", False) if occ else False,
+                "demand_drivers": "; ".join(occ.get("demand_drivers", [])) if occ else "",
+                "review_histogram": json.dumps(ai_data.get("monthly_review_histogram", {})),
+                "ai_pros": "; ".join([f"{p['topic']} ({p['count']})" for p in pc.get('pros', [])]),
+                "ai_cons": "; ".join([f"{c['topic']} ({c['count']})" for c in pc.get('cons', [])]),
                 "last_scraped": datetime.now()
             }
             PipelineLogger.log_event("STORAGE_ROW", row)
@@ -227,9 +264,8 @@ class P4NScraper:
             try: await page.click(".cc-btn-accept", timeout=3000)
             except: pass
             
-            logged_in = await self.login(page)
-            if not logged_in and not self.is_dev:
-                print("🛑 [CRITICAL] Login failed. Aborting production run.")
+            if not await self.login(page) and not self.is_dev:
+                print("🛑 [CRITICAL] Login failed. Aborting run.")
                 await browser.close()
                 return
 
