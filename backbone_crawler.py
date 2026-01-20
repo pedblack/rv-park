@@ -85,7 +85,6 @@ class P4NScraper:
         self.csv_file = DEV_CSV if is_dev else PROD_CSV
         self.processed_batch = []
         self.existing_df = self._load_existing()
-        # --- TRACKING STATS ---
         self.stats = {"read": 0, "discarded_fresh": 0, "discarded_low_feedback": 0}
 
     def _load_existing(self):
@@ -116,10 +115,11 @@ class P4NScraper:
     async def analyze_with_ai(self, raw_data):
         system_instruction = (
             "Analyze data and return JSON ONLY. "
-            "Schema: { 'parking_min': float, 'parking_max': float, 'electricity_eur': float, "
+            "Schema: { 'parking_min': float, 'parking_max': float, 'electricity_eur': float, 'num_places': int, "
             "'pros': [ {'topic': 'string', 'count': int} ], 'cons': [ {'topic': 'string', 'count': int} ], "
             "'languages': [ {'lang': 'string', 'count': int} ] }. "
-            "List by recurrence frequency. Topics 3-5 words max."
+            "1. Extract 'num_places' from the 'places_count' field. 2. List items by recurrence frequency. "
+            "3. Summary topics 3-5 words max."
         )
         json_payload = json.dumps(raw_data, default=str, ensure_ascii=False)
         config = types.GenerateContentConfig(response_mime_type="application/json", temperature=0.1, system_instruction=system_instruction)
@@ -142,14 +142,21 @@ class P4NScraper:
             actual_feedback_count = int(count_match.group(1)) if count_match else 0
             
             if actual_feedback_count < MIN_REVIEWS_THRESHOLD:
-                print(f"🗑️  [DISCARD] Insufficient feedback ({actual_feedback_count} reviews). Required: {MIN_REVIEWS_THRESHOLD}")
+                print(f"🗑️  [DISCARD] Insufficient feedback ({actual_feedback_count} reviews).")
                 self.stats["discarded_low_feedback"] += 1
                 return
 
             p_id = await page.locator("body").get_attribute("data-place-id") or url.split("/")[-1]
             title = (await page.locator("h1").first.inner_text()).split('\n')[0].strip()
             
-            # Coordinates/Rating/Review collection...
+            # --- LOCATION TYPE EXTRACTION ---
+            location_type = "Unknown"
+            try:
+                # Grab the title attribute from the icon img in the header
+                location_type = await page.locator(".place-header-access img").get_attribute("title")
+            except: pass
+
+            # Coordinates
             lat, lng = 0.0, 0.0
             coord_link = await page.locator("a[href*='lat='][href*='lng=']").first.get_attribute("href")
             if coord_link:
@@ -164,6 +171,8 @@ class P4NScraper:
 
             raw_payload = {
                 "p4n_id": p_id,
+                "location_type": location_type,
+                "places_count": await self._get_dl(page, "Number of places"),
                 "parking_cost": await self._get_dl(page, "Parking cost"),
                 "services_cost": await self._get_dl(page, "Price of services"),
                 "all_reviews": reviews_text 
@@ -172,6 +181,8 @@ class P4NScraper:
             ai_data = await self.analyze_with_ai(raw_payload)
             row = {
                 "p4n_id": p_id, "title": title, "url": url, "latitude": lat, "longitude": lng,
+                "location_type": location_type,
+                "num_places": ai_data.get("num_places", 0),
                 "total_reviews": actual_feedback_count, "avg_rating": avg_rating,
                 "parking_min_eur": ai_data.get("parking_min", 0),
                 "parking_max_eur": ai_data.get("parking_max", 0),
@@ -192,7 +203,7 @@ class P4NScraper:
     async def start(self):
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
-            context = await browser.new_context(user_agent="Mozilla/5.0...")
+            context = await browser.new_context(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
             page = await context.new_page()
             await Stealth().apply_stealth_async(page)
             await page.goto("https://park4night.com/en", wait_until="networkidle")
@@ -225,7 +236,7 @@ class P4NScraper:
                 
                 if is_stale: queue.append(link)
                 else: 
-                    print(f"🗑️  [DISCARD] Skipping {p_id}: Already updated within {STALENESS_DAYS} days.")
+                    print(f"🗑️  [DISCARD] Skipping {p_id}: Updated within 30 days.")
                     self.stats["discarded_fresh"] += 1
 
             print(f"🔍 Found {len(discovered)} items. TTL skips: {self.stats['discarded_fresh']}. Stale items: {len(queue)}\n")
@@ -235,13 +246,12 @@ class P4NScraper:
             await browser.close()
             self._upsert_and_save()
             
-            # --- FINAL LOG SUMMARY ---
             print(f"\n🏁 [RUN SUMMARY]")
-            print(f"🔹 Total properties identified: {len(discovered)}")
-            print(f"🔹 Scrape attempts (stale): {self.stats['read']}")
-            print(f"🔹 Discarded (Fresh < 30d): {self.stats['discarded_fresh']}")
-            print(f"🔹 Discarded (Low Feedback): {self.stats['discarded_low_feedback']}")
-            print(f"🚀 Refreshed Database: {len(self.processed_batch)} new records.")
+            print(f"🔹 Total identified: {len(discovered)}")
+            print(f"🔹 Scrape attempts: {self.stats['read']}")
+            print(f"🔹 Discarded (Fresh): {self.stats['discarded_fresh']}")
+            print(f"🔹 Discarded (Low Feed): {self.stats['discarded_low_feedback']}")
+            print(f"🚀 Database Refreshed: {len(self.processed_batch)} records.")
 
             if not self.is_dev: DailyQueueManager.increment_state()
 
