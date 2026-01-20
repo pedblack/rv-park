@@ -1,5 +1,170 @@
-p4n_id,title,url
-30443,"Parque De Campismo São Miguel
+p4n_id,title,type,rating,parking_min_eur,parking_max_eur,service_price_eur,num_places,ai_pros,ai_cons,lang_dist,url,last_scraped
+423981,(7630-174) São Luís - 1 N120,Extra services,5,0.0,0.0,0.0,10,N/A,N/A,{},https://park4night.com/en/place/423981,2026-01-20 00:59:24
+572641,(7630-174) Monte Parreira,Homestays accommodation,5,0.0,0.0,0.0,2,N/A,N/A,{},https://park4night.com/en/place/572641,2026-01-20 00:59:17
+647436,(7645-314) Vila Nova de Milfontes - R. António Mantas,Parking lot day/night,1,0.0,0.0,0.0,10,N/A,N/A,{},https://park4night.com/en/place/647436,2026-01-20 00:59:10
+192084,(7520-196) Sines - 23 Rua dos Pescadores,Parking lot day/night,3.5,0.0,0.0,0.0,10,N/A,N/A,{},https://park4night.com/en/place/192084,2026-01-20 00:59:02
+424712,(7630-174) Odemira - R. César Mirandas,Extra services,3.67,0.0,0.0,0.0,1,N/A,N/A,{},https://park4night.com/en/place/424712,2026-01-20 00:58:24
+306873,(7520-241) Sines - 40 Rua Serpa Pinto,Extra services,3,0.0,0.0,0.0,333,N/A,N/A,{},https://park4night.com/en/place/306873,2026-01-20 00:58:17
+500937,(7500-170) Santiago do Cacém - 71 Rua dos Golfinhos,Extra services,0,0.0,0.0,0.0,4,N/A,N/A,{},https://park4night.com/en/place/500937,2026-01-20 00:58:09
+188426,(7630-174) - Unnamed Road,Parking lot day/night,3.82,0.0,0.0,0.0,5,N/A,N/A,{},https://park4night.com/en/place/188426,2026-01-20 00:58:02
+439205,(7630-174) Zambujeira do Mar - Unnamed Road,Extra services,4.05,0.0,0.0,0.0,N/A,N/A,N/A,{},https://park4night.com/en/place/439205,2026-01-20 00:57:54
+106955,(20303) Narva - 5 Tallinn–Narva,Parking lot day/night,2.67,0.0,0.0,0.0,N/A,N/A,N/A,{},https://park4night.com/en/place/106955,2026-01-20 00:56:47
+530678,(7520-203) Sines -,Parking lot day/night,2.75,0.0,0.0,0.0,1,N/A,N/A,{},https://park4night.com/en/place/530678,2026-01-20 00:55:10
+224770,(7645-313) Vila Nova de Milfontes - 45 Rua do Moinho de Vento,Extra services,5,0.0,0.0,0.0,3,N/A,N/A,{},https://park4night.com/en/place/224770,2026-01-20 00:54:32
+187368,(7520) Porto Covo - 10 Rua Carlos Tê,Parking lot day/night,3.6,0.0,0.0,0.0,20,N/A,N/A,{},https://park4night.com/en/place/187368,2026-01-20 00:54:26
+130521,(7540) Santiago do Cacém - 14 Rua Vasco da Gama,Parking lot day/night,3,0.0,0.0,0.0,N/A,N/A,N/A,{},https://park4night.com/en/place/130521,2026-01-20 00:53:48
+633301,(8670-320) São Teotónio - Rua dos Pescadores,Parking lot day/night,4.14,0.0,0.0,0.0,6,N/A,N/A,{},https://park4night.com/en/place/633301,2026-01-20 00:53:10
+13808,() Ourique - 128 Rua da Sardoa,Parking lot day/night,3.91,0.0,0.0,0.0,N/A,N/A,N/A,{},https://park4night.com/en/place/13808,2026-01-20 00:53:03
+556333,(7520) Sines - 11 Rua Vitalina da Silva,Parking lot day/night,4.2,0.0,0.0,0.0,20,N/A,N/A,{},https://park4night.com/en/place/556333,2026-01-20 00:51:25
+46360,(7670) - N261-4,Parking lot day/night,3.89,0.0,0.0,0.0,20,N/A,N/A,{},https://park4night.com/en/place/46360,2026-01-20 00:50:47
+476938,(7630-174) Odemira - 13 Rua das Barreiras Vermelhas,Parking lot day/night,4.48,0.0,0.0,0.0,12,N/A,N/A,{},https://park4night.com/en/place/476938,2026-01-20 00:50:39
+468153,(7600) Messejana -,Rest area,0,0.0,0.0,0.0,10,N/A,N/A,{},https://park4night.com/en/place/468153,2026-01-20 00:50:30
+560387,(7565) Mimosa - 60 IC1,Parking lot day/night,3.5,0.0,0.0,0.0,6,N/A,N/A,{},https://park4night.com/en/place/560387,2026-01-20 00:50:22
+45946,(7520) Sines - 1 A26-1,Parking lot day/night,3.62,0.0,0.0,0.0,3,N/A,N/A,{},https://park4night.com/en/place/45946,2026-01-20 00:49:45
+544500,(8670-320) Odeceixe - 73 Rua 25 Abril,Extra services,0,0.0,0.0,0.0,1,N/A,N/A,{},https://park4night.com/en/place/544500,2026-01-20 00:49:37
+490873,(7630-174) Odemira - N123,Extra services,5,0.0,0.0,0.0,1,N/A,N/A,{},https://park4night.com/en/place/490873,2026-01-20 00:49:29
+45489,(7565) Alvalade - 109 Avenida Cinco Outubro,Parking lot day/night,5,0.0,0.0,0.0,N/A,N/A,N/A,{},https://park4night.com/en/place/45489,2026-01-20 00:49:22
+26016,(7520-001) Sines - R261-5,Service area without parking,4.12,0.0,0.0,0.0,N/A,N/A,N/A,{},https://park4night.com/en/place/26016,2026-01-20 00:47:45
+401244,(7670-201) Baixo Alentejo - M503,Parking lot day/night,5,0.0,0.0,0.0,5,N/A,N/A,{},https://park4night.com/en/place/401244,2026-01-20 00:46:37
+420351,(7630-174) Odemira - Unnamed Road,Homestays accommodation,5,0.0,0.0,0.0,3,N/A,N/A,{},https://park4night.com/en/place/420351,2026-01-20 00:45:59
+646606,"(7540-148) Santiago do Cacém, Santa Cruz e São Ba - Trilho Rio da Figueira",Parking lot day/night,4.2,0.0,0.0,0.0,5,N/A,N/A,{},https://park4night.com/en/place/646606,2026-01-20 00:45:51
+96477,(7630-174) Aguas Vivas,Private car park for campers,4.84,0.0,0.0,0.0,15,N/A,N/A,{},https://park4night.com/en/place/96477,2026-01-20 00:45:43
+196086,(7630-174) São Teotónio -,"On the farm (farm, vineyard ...)",4.7,0.0,0.0,0.0,2,N/A,N/A,{},https://park4night.com/en/place/196086,2026-01-20 00:45:32
+486292,(7630-174) S.Teotónio - Unnamed Road,Parking lot day/night,3,0.0,0.0,0.0,2,N/A,N/A,{},https://park4night.com/en/place/486292,2026-01-20 00:45:25
+548762,(7630-174) Santa Bárbara -,Homestays accommodation,4.78,0.0,0.0,0.0,5,N/A,N/A,{},https://park4night.com/en/place/548762,2026-01-20 00:45:17
+553945,(7630-174) Odemira -,Homestays accommodation,5,0.0,0.0,0.0,2,N/A,N/A,{},https://park4night.com/en/place/553945,2026-01-20 00:45:10
+495742,(7630-174) Odemira - IC4,Parking lot day/night,2,0.0,0.0,0.0,6,N/A,N/A,{},https://park4night.com/en/place/495742,2026-01-20 00:45:01
+97590,(7630) Odemira - 3 Rua Do Comercio,Extra services,3,0.0,0.0,0.0,8,N/A,N/A,{},https://park4night.com/en/place/97590,2026-01-20 00:44:55
+119482,(7665-880) Santa Clara -a -Velha - 3 Pç. Doutor Oliveira Salazar,Extra services,3.71,0.0,0.0,0.0,N/A,N/A,N/A,{},https://park4night.com/en/place/119482,2026-01-20 00:44:47
+475330,(7500-220) Sines - Unnamed Road,Parking lot day/night,3.88,0.0,0.0,0.0,4,N/A,N/A,{},https://park4night.com/en/place/475330,2026-01-20 00:44:09
+463241,(7565) Camping Monte Naturista O Barao,Camping,3.9,0.0,0.0,0.0,40,N/A,N/A,{},https://park4night.com/en/place/463241,2026-01-20 00:43:31
+29073,(7520) Campsites Porto Covo,Camping,3.37,0.0,0.0,0.0,90,N/A,N/A,{},https://park4night.com/en/place/29073,2026-01-20 00:43:25
+657836,(7520-001) Sines - Parking Intermarché,Extra services,0,0.0,0.0,0.0,2,N/A,N/A,{},https://park4night.com/en/place/657836,2026-01-20 00:43:17
+267275,(7630-174) - 10 Praça dos Fuzileiros,Extra services,5,0.0,0.0,0.0,6,N/A,N/A,{},https://park4night.com/en/place/267275,2026-01-20 00:43:10
+260875,(7520-200) Sines - 40 Rua do Forte,Parking lot day/night,3.71,0.0,0.0,0.0,8,N/A,N/A,{},https://park4night.com/en/place/260875,2026-01-20 00:43:03
+110836,(7520) Sines - 47 Alameda da Paz,Parking lot day/night,3.47,0.0,0.0,0.0,10,N/A,N/A,{},https://park4night.com/en/place/110836,2026-01-20 00:42:24
+8637,(7630-740) Camping Villa Park Zambujeira,Camping,4.54,0.0,0.0,0.0,50,N/A,N/A,{},https://park4night.com/en/place/8637,2026-01-20 00:41:16
+589090,(7645) Vila Nova de Milfontes -,Private car park for campers,4.86,0.0,0.0,0.0,10,N/A,N/A,{},https://park4night.com/en/place/589090,2026-01-20 00:41:04
+475396,(7540) Santiago do Cacém - Unnamed Road,Parking lot day/night,4.25,0.0,0.0,0.0,3,N/A,N/A,{},https://park4night.com/en/place/475396,2026-01-20 00:40:56
+311902,(7520-196) Sines - 3 Largo Nossa Senhora das Salvas,Parking lot day/night,3.67,0.0,0.0,0.0,2,N/A,N/A,{},https://park4night.com/en/place/311902,2026-01-20 00:40:20
+461791,(8670) Odeceixe -,Parking lot day/night,0,0.0,0.0,0.0,5,N/A,N/A,{},https://park4night.com/en/place/461791,2026-01-20 00:40:12
+370099,(7520) Sines - 18 Largo Ramos da Costa,Parking lot day/night,2.8,0.0,0.0,0.0,6,N/A,N/A,{},https://park4night.com/en/place/370099,2026-01-20 00:40:04
+212659,(7520) - 8 Beco Praia da Cerca Nova,Extra services,2.88,0.0,0.0,0.0,N/A,N/A,N/A,{},https://park4night.com/en/place/212659,2026-01-20 00:39:57
+40034,(7645) Orbitur Camping Park - Sitava Milfontes,Camping,3.28,0.0,0.0,0.0,100,N/A,N/A,{},https://park4night.com/en/place/40034,2026-01-20 00:39:21
+303940,(7645) Vila Nova de Milfontes - 29 Rua Das Pousadas,Parking lot day/night,4.07,0.0,0.0,0.0,N/A,N/A,N/A,{},https://park4night.com/en/place/303940,2026-01-20 00:39:12
+111308,(7645-296) Vila Nova de Milfontes - Rua do Moinho de Vento Loja 13,Extra services,4.2,0.0,0.0,0.0,2,N/A,N/A,{},https://park4night.com/en/place/111308,2026-01-20 00:38:35
+20450,() Santiago do Cacém - 18 Estrada do Fidalgo,Free motorhome area,3.83,0.0,0.0,0.0,60,N/A,N/A,{},https://park4night.com/en/place/20450,2026-01-20 00:37:57
+412703,(7630-536) Monte Huam Hu,"On the farm (farm, vineyard ...)",4.86,0.0,0.0,0.0,2,N/A,N/A,{},https://park4night.com/en/place/412703,2026-01-20 00:37:49
+122829,(7520-151) Sines -,Parking lot day/night,3.61,0.0,0.0,0.0,20,N/A,N/A,{},https://park4night.com/en/place/122829,2026-01-20 00:37:41
+440341,(7630) Adega dos Nascedios,"On the farm (farm, vineyard ...)",4.92,0.0,0.0,0.0,10,N/A,N/A,{},https://park4night.com/en/place/440341,2026-01-20 00:37:04
+496539,(7630-174) Zambujeira do Mar - 22 Entrada da Barca,Extra services,4,0.0,0.0,0.0,2,N/A,N/A,{},https://park4night.com/en/place/496539,2026-01-20 00:36:56
+311155,(7670) Camping Corgo do Pardieiro,Homestays accommodation,4,0.0,0.0,0.0,4,N/A,N/A,{},https://park4night.com/en/place/311155,2026-01-20 00:36:49
+464951,(8670-320) Odeceixe - 31A Largo do Povo,Extra services,0,0.0,0.0,0.0,1,N/A,N/A,{},https://park4night.com/en/place/464951,2026-01-20 00:36:41
+559722,(7630-174) Odemira - 20 Alto de São Sebastião,Extra services,0,0.0,0.0,0.0,1,N/A,N/A,{},https://park4night.com/en/place/559722,2026-01-20 00:36:33
+86930,(7520-233) Sines - 15 Rua Paulo da Gama,Parking lot day/night,3.84,0.0,0.0,0.0,10,N/A,N/A,{},https://park4night.com/en/place/86930,2026-01-20 00:36:25
+614744,(7645-253) Vila Nova de Milfontes - Rua Custódio Brás Pacheco,Extra services,2,0.0,0.0,0.0,1,N/A,N/A,{},https://park4night.com/en/place/614744,2026-01-20 00:35:47
+118590,(7630-174) Odemira - Unnamed Road,Parking lot day/night,3.92,0.0,0.0,0.0,10,N/A,N/A,{},https://park4night.com/en/place/118590,2026-01-20 00:35:40
+314760,(7555) Cercal do Alentejo - Estrada de Colos,Parking lot day/night,3.73,0.0,0.0,0.0,3,N/A,N/A,{},https://park4night.com/en/place/314760,2026-01-20 00:35:03
+35314,(7600-311) Parque de autocaravanas da Quinta da Cerca,Private car park for campers,4.15,0.0,0.0,0.0,50,N/A,N/A,{},https://park4night.com/en/place/35314,2026-01-20 00:34:56
+24042,(7645-243) Campiférias,Camping,3.43,0.0,0.0,0.0,50,N/A,N/A,{},https://park4night.com/en/place/24042,2026-01-20 00:34:49
+157181,(7570) Minas do Lousal -,Parking lot day/night,4.33,0.0,0.0,0.0,100,N/A,N/A,{},https://park4night.com/en/place/157181,2026-01-20 00:34:41
+482151,(7630-174) Odemira - Avenida do Sul,MH parking without services,3.5,0.0,0.0,0.0,5,N/A,N/A,{},https://park4night.com/en/place/482151,2026-01-20 00:34:32
+165654,(7555) Santiago do Cacém - Unnamed Road,Extra services,4.53,0.0,0.0,0.0,3,N/A,N/A,{},https://park4night.com/en/place/165654,2026-01-20 00:33:55
+366490,(7540) Santiago do Cacém - 7 N261-3,Extra services,4.67,0.0,0.0,0.0,1,N/A,N/A,{},https://park4night.com/en/place/366490,2026-01-20 00:33:48
+221510,(7520-101) Sines - 36 Rua Sacadura Cabral,Extra services,3.25,0.0,0.0,0.0,1,N/A,N/A,{},https://park4night.com/en/place/221510,2026-01-20 00:33:40
+385618,(7540) Cruz João Mendes - 38 N120,Extra services,5,0.0,0.0,0.0,1,N/A,N/A,{},https://park4night.com/en/place/385618,2026-01-20 00:33:33
+169931,(7540-195) Santiago do Cacém - 11 R. das Nogueiras,Extra services,4.11,0.0,0.0,0.0,20,N/A,N/A,{},https://park4night.com/en/place/169931,2026-01-20 00:33:25
+460498,(7630-174) Zambujeira do Mar - 5 Rua Joao Pedro da Costa,Extra services,4,0.0,0.0,0.0,N/A,N/A,N/A,{},https://park4night.com/en/place/460498,2026-01-20 00:33:18
+496083,(7665) Luzianes - R. da Estação,Extra services,4.5,0.0,0.0,0.0,1,N/A,N/A,{},https://park4night.com/en/place/496083,2026-01-20 00:32:39
+53648,(7520) Sines - M1109,Parking lot day/night,4.14,0.0,0.0,0.0,15,N/A,N/A,{},https://park4night.com/en/place/53648,2026-01-20 00:32:31
+483321,(7670) Garvão - 10 Rua Doutor Manuel Louçao Martins,MH parking without services,3.25,0.0,0.0,0.0,4,N/A,N/A,{},https://park4night.com/en/place/483321,2026-01-20 00:32:23
+88957,(7630) Monte Carvalhal da Rocha,Camping,3.67,0.0,0.0,0.0,40,N/A,N/A,{},https://park4night.com/en/place/88957,2026-01-20 00:32:16
+439136,(7670-503) Santa Luzia - 3A Rua dos Marmeleiros,Extra services,1,0.0,0.0,0.0,1,N/A,N/A,{},https://park4night.com/en/place/439136,2026-01-20 00:32:08
+472687,(7520-437) Porto Covo - 41 Rua Conde Bandeira,Extra services,4,0.0,0.0,0.0,N/A,N/A,N/A,{},https://park4night.com/en/place/472687,2026-01-20 00:32:00
+113748,(7630-174) Santa Maria - Rua do Cemitério,MH parking without services,3.23,0.0,0.0,0.0,3,N/A,N/A,{},https://park4night.com/en/place/113748,2026-01-20 00:30:53
+18105,(7520-109) Estacionamento do Miradouro da Costa do Norte,Parking lot day/night,4.32,0.0,0.0,0.0,12,N/A,N/A,{},https://park4night.com/en/place/18105,2026-01-20 00:30:44
+303459,(7630 590) Casas novas da Palmeira,"On the farm (farm, vineyard ...)",4.37,0.0,0.0,0.0,4,N/A,N/A,{},https://park4night.com/en/place/303459,2026-01-20 00:30:07
+328827,(7540) Santiago do Cacém - 5 Estrada do Fidalgo,Extra services,2.5,0.0,0.0,0.0,10,N/A,N/A,{},https://park4night.com/en/place/328827,2026-01-20 00:29:59
+434834,(7555-267) Santiago do Cacém - Unnamed Road,Service area without parking,4.6,0.0,0.0,0.0,1,N/A,N/A,{},https://park4night.com/en/place/434834,2026-01-20 00:29:52
+311320,(X479+M3) Sines - Av. da Costa do Norte,Parking lot day/night,4.31,0.0,0.0,0.0,8,N/A,N/A,{},https://park4night.com/en/place/311320,2026-01-20 00:29:14
+299555,(7630) Monte Maravilhas,Camping,3.78,0.0,0.0,0.0,12,N/A,N/A,{},https://park4night.com/en/place/299555,2026-01-20 00:29:05
+485918,(7520) Sines - 59 Alameda da Paz,Extra services,0,0.0,0.0,0.0,10,N/A,N/A,{},https://park4night.com/en/place/485918,2026-01-20 00:28:59
+109040,(7630-174) São Luís - 4 Rua Liga dos Amigos,MH parking without services,2.55,0.0,0.0,0.0,5,N/A,N/A,{},https://park4night.com/en/place/109040,2026-01-20 00:28:51
+275662,(7540-205) Santiago do Cacém - 3 Rua Ramos da Costa,Extra services,5,0.0,0.0,0.0,1,N/A,N/A,{},https://park4night.com/en/place/275662,2026-01-20 00:27:44
+389406,(7520-106) Sines - Av. Gen. Humberto Delgado,Extra services,3.6,0.0,0.0,0.0,1,N/A,N/A,{},https://park4night.com/en/place/389406,2026-01-20 00:27:37
+588564,(7520) Sines - Unnamed road,Parking lot day/night,4.38,0.0,0.0,0.0,5,N/A,N/A,{},https://park4night.com/en/place/588564,2026-01-20 00:27:28
+443397,(7500-170) Santiago do Cacém - 17 Rua do Mercado,Parking lot day/night,4.67,0.0,0.0,0.0,10,N/A,N/A,{},https://park4night.com/en/place/443397,2026-01-20 00:26:50
+30087,(7645-285) Camping Milfontes,Camping,3.68,0.0,0.0,0.0,N/A,N/A,N/A,{},https://park4night.com/en/place/30087,2026-01-20 00:26:42
+314902,(7500-220) Santiago do Cacém - 37 Avenida de Sines,Extra services,3,0.0,0.0,0.0,1,N/A,N/A,{},https://park4night.com/en/place/314902,2026-01-20 00:26:04
+24661,(7500-120) Alentejo Litoral Caravan Park,Paying motorhome area,3.08,0.0,0.0,0.0,10,N/A,N/A,{},https://park4night.com/en/place/24661,2026-01-20 00:25:57
+485625,(7500-170) Santiago do Cacém - 22 Rua do Mercado,Extra services,4,0.0,0.0,0.0,1,N/A,N/A,{},https://park4night.com/en/place/485625,2026-01-20 00:25:49
+177225,(7570) Santa Margarida da Serra - Unnamed Road,"On the farm (farm, vineyard ...)",4.86,0.0,0.0,0.0,8,N/A,N/A,{},https://park4night.com/en/place/177225,2026-01-20 00:25:42
+587424,(7520-109) Sines - A26-1,Parking lot day/night,4.27,0.0,0.0,0.0,6,N/A,N/A,{},https://park4night.com/en/place/587424,2026-01-20 00:25:35
+162119,(7520) Sines - 127 Rua Marquês de Pombal,Extra services,5,0.0,0.0,0.0,N/A,N/A,N/A,{},https://park4night.com/en/place/162119,2026-01-20 00:25:27
+317227,(7520) Sines -,Extra services,4.09,0.0,0.0,0.0,50,N/A,N/A,{},https://park4night.com/en/place/317227,2026-01-20 00:24:50
+77687,(8550) Selao - M501,Parking lot day/night,3.83,0.0,0.0,0.0,N/A,N/A,N/A,{},https://park4night.com/en/place/77687,2026-01-20 00:24:43
+222022,(7600) Terra Nua - Naturist Camping Site,Camping,4.68,0.0,0.0,0.0,30,N/A,N/A,{},https://park4night.com/en/place/222022,2026-01-20 00:23:05
+177331,(7645-065) Quinta do Rossi - Caravan Park,Private car park for campers,4.59,0.0,0.0,0.0,17,N/A,N/A,{},https://park4night.com/en/place/177331,2026-01-20 00:22:57
+335819,(7520-219) Sines - 127 Rua Júlio Gomes da Silva,Extra services,5,0.0,0.0,0.0,1,N/A,N/A,{},https://park4night.com/en/place/335819,2026-01-20 00:22:49
+476338,(7630) São Martinho das Amoreiras - 26 Rua do Algarve,Extra services,5,0.0,0.0,0.0,1,N/A,N/A,{},https://park4night.com/en/place/476338,2026-01-20 00:22:42
+89145,(7630) Bp petromira,Extra services,3.82,0.0,0.0,0.0,4,N/A,N/A,{},https://park4night.com/en/place/89145,2026-01-20 00:22:34
+217743,(7645-251) Vila Nova de Milfontes - 28 Rua António Mantas,Extra services,4,0.0,0.0,0.0,4,N/A,N/A,{},https://park4night.com/en/place/217743,2026-01-20 00:22:27
+400293,(7630-578) Flor do Brejo,"On the farm (farm, vineyard ...)",4.81,0.0,0.0,0.0,5,N/A,N/A,{},https://park4night.com/en/place/400293,2026-01-20 00:22:19
+110869,(7630-174) - Unnamed Road,Extra services,3,0.0,0.0,0.0,N/A,N/A,N/A,{},https://park4night.com/en/place/110869,2026-01-20 00:22:12
+73881,(7520) Sines - Unnamed Road,Extra services,4.52,0.0,0.0,0.0,N/A,N/A,N/A,{},https://park4night.com/en/place/73881,2026-01-20 00:21:04
+341152,(7520-151) Sines - 5 Rua Sacadura Cabral,Parking lot day/night,3.82,0.0,0.0,0.0,20,N/A,N/A,{},https://park4night.com/en/place/341152,2026-01-20 00:20:27
+222184,(8670-325) Odeceixe - Rua do Recanto,Extra services,3.72,0.0,0.0,0.0,N/A,N/A,N/A,{},https://park4night.com/en/place/222184,2026-01-20 00:20:18
+317945,(7630) Colos - 2 N389,Parking lot day/night,3,0.0,0.0,0.0,14,N/A,N/A,{},https://park4night.com/en/place/317945,2026-01-20 00:19:40
+575585,(7630-536) São Martinho das Amoreiras - 2 Rua do Bairro Social,Parking lot day/night,0,0.0,0.0,0.0,2,N/A,N/A,{},https://park4night.com/en/place/575585,2026-01-20 00:19:02
+557299,(7500) Santiago do Cacém - 18 Rua da Videira,Parking lot day/night,2,0.0,0.0,0.0,3,N/A,N/A,{},https://park4night.com/en/place/557299,2026-01-20 00:18:54
+381425,(A26-1) Sines - 3 Rua Interior do Porto de Pesca de Sines,Parking lot day/night,3.78,0.0,0.0,0.0,5,N/A,N/A,{},https://park4night.com/en/place/381425,2026-01-20 00:18:46
+338554,(7670) Funcheira - Rua do Poço Novo 11,Homestays accommodation,3.8,0.0,0.0,0.0,4,N/A,N/A,{},https://park4night.com/en/place/338554,2026-01-20 00:18:38
+398761,(7665) Luzianes - Vale Cernes,Homestays accommodation,4.8,0.0,0.0,0.0,2,N/A,N/A,{},https://park4night.com/en/place/398761,2026-01-20 00:18:29
+185459,(7520) Parque de Campismo da Ilha do Pessegueiro,Camping,3.3,0.0,0.0,0.0,N/A,N/A,N/A,{},https://park4night.com/en/place/185459,2026-01-20 00:18:22
+395390,(7645-224) Vila Nova de Milfontes - 26 E Rua Artur Horta,Extra services,3.67,0.0,0.0,0.0,N/A,N/A,N/A,{},https://park4night.com/en/place/395390,2026-01-20 00:17:44
+398554,(7565) Ermidas do Sado - 7565 N121,Extra services,4.5,0.0,0.0,0.0,1,N/A,N/A,{},https://park4night.com/en/place/398554,2026-01-20 00:17:07
+329349,(7630-174) Beja - M532,Extra services,5,0.0,0.0,0.0,1,N/A,N/A,{},https://park4night.com/en/place/329349,2026-01-20 00:16:59
+30443,(7630-592) Parque De Campismo São Miguel,Camping,3.82,0.0,0.0,0.0,400,N/A,N/A,{},https://park4night.com/en/place/30443,2026-01-20 00:16:52
+361330,(7520) Sines - 1 Avenida Vasco da Gama,Parking lot day/night,3.98,0.0,0.0,0.0,10,N/A,N/A,{},https://park4night.com/en/place/361330,2026-01-20 00:16:43
+598941,(7520-203) Sines - 35 Rua Amílcar Cabral,Parking lot day/night,0,0.0,0.0,0.0,3,N/A,N/A,{},https://park4night.com/en/place/598941,2026-01-20 00:16:35
+476314,(7630-536) Monte das Laranjeiras,Homestays accommodation,0,0.0,0.0,0.0,3,N/A,N/A,{},https://park4night.com/en/place/476314,2026-01-20 00:15:56
+428897,(7665) Monte Cruz,"On the farm (farm, vineyard ...)",4.43,0.0,0.0,0.0,2,N/A,N/A,{},https://park4night.com/en/place/428897,2026-01-20 00:15:49
+632653,(7645-253) Longueira/Almograve - Acesso à parte inferior da ponte,Parking lot day/night,4,0.0,0.0,0.0,5,N/A,N/A,{},https://park4night.com/en/place/632653,2026-01-20 00:15:41
+18333,(7520) Camping Costa Vizir,Camping,4.28,0.0,0.0,0.0,200,N/A,N/A,{},https://park4night.com/en/place/18333,2026-01-20 00:15:34
+485927,(7665) Baranco de Vale Francisco -,Homestays accommodation,0,0.0,0.0,0.0,2,N/A,N/A,{},https://park4night.com/en/place/485927,2026-01-20 00:15:26
+564505,(7540-236) Santiago do Cacém - 14 Estrada do Fidalgo,Service area without parking,3.25,0.0,0.0,0.0,1,N/A,N/A,{},https://park4night.com/en/place/564505,2026-01-20 00:15:17
+603985,(7630-174) NM - Natured Minds,"On the farm (farm, vineyard ...)",5,0.0,0.0,0.0,3,N/A,N/A,{},https://park4night.com/en/place/603985,2026-01-20 00:15:10
+304594,(7630-174) São Luís - 1 N120,Extra services,4.93,0.0,0.0,0.0,3,N/A,N/A,{},https://park4night.com/en/place/304594,2026-01-20 00:15:02
+655835,(8670-320) Odeceixe - Variante 19 de Abril,Parking lot day/night,0,0.0,0.0,0.0,20,N/A,N/A,{},https://park4night.com/en/place/655835,2026-01-20 00:14:55
+23784,(7520-075) Campigir São Torpes,Camping,3.17,0.0,0.0,0.0,10,N/A,N/A,{},https://park4night.com/en/place/23784,2026-01-20 00:14:16
+568596,(7520-259) Sines - Av. Gen. Humberto Delgado,Extra services,1,0.0,0.0,0.0,1,N/A,N/A,{},https://park4night.com/en/place/568596,2026-01-20 00:14:08
+508399,(8670) Odeceixe - 7 Rua das Escolas,Paying motorhome area,4.25,0.0,0.0,0.0,26,N/A,N/A,{},https://park4night.com/en/place/508399,2026-01-20 00:14:01
+475324,(7520-259) Sines - 4 Dom Pedro I,Extra services,5,0.0,0.0,0.0,10,N/A,N/A,{},https://park4night.com/en/place/475324,2026-01-20 00:13:54
+205362,(7540) - 4 Largo 25 de Abril,Extra services,5,0.0,0.0,0.0,2,N/A,N/A,{},https://park4night.com/en/place/205362,2026-01-20 00:13:47
+246912,(7540) - N121,Private car park for campers,4.55,0.0,0.0,0.0,20,N/A,N/A,{},https://park4night.com/en/place/246912,2026-01-20 00:13:40
+643948,(8670-320) São Teotónio - Unnamed Road,Parking lot day/night,5,0.0,0.0,0.0,2,N/A,N/A,{},https://park4night.com/en/place/643948,2026-01-20 00:13:32
+99805,(7630-208) Odemira - N393,Extra services,3,0.0,0.0,0.0,5,N/A,N/A,{},https://park4night.com/en/place/99805,2026-01-20 00:12:54
+316095,(7665) Craveiras -,Homestays accommodation,5,0.0,0.0,0.0,1,N/A,N/A,{},https://park4night.com/en/place/316095,2026-01-20 00:12:46
+477612,(7520-313) Sines - 9 Quinta do Meio,Extra services,5,0.0,0.0,0.0,4,N/A,N/A,{},https://park4night.com/en/place/477612,2026-01-20 00:12:39
+590832,(7520-103) Sines - Lote 7 Avenida General Humberto Delgado,Parking lot day/night,0,0.0,0.0,0.0,3,N/A,N/A,{},https://park4night.com/en/place/590832,2026-01-20 00:12:31
+393976,(7630-174) São Luís - 24 Rua Liga dos Amigos,Extra services,0,0.0,0.0,0.0,N/A,N/A,N/A,{},https://park4night.com/en/place/393976,2026-01-20 00:11:53
+364858,"(7630-521) Odemira - Ameixeira, EM 503","On the farm (farm, vineyard ...)",4.59,0.0,0.0,0.0,5,N/A,N/A,{},https://park4night.com/en/place/364858,2026-01-20 00:10:45
+406938,(7645-253) Vila Nova de Milfontes - 6 N390,Extra services,4.5,0.0,0.0,0.0,2,N/A,N/A,{},https://park4night.com/en/place/406938,2026-01-20 00:10:37
+461743,(7670) Garvão -,"On the farm (farm, vineyard ...)",5,0.0,0.0,0.0,2,N/A,N/A,{},https://park4night.com/en/place/461743,2026-01-20 00:10:31
+414156,(7555) Chaparral - Unnamed Road,Service area without parking,4.76,0.0,0.0,0.0,N/A,N/A,N/A,{},https://park4night.com/en/place/414156,2026-01-20 00:10:23
+163064,(7630-174) Odemira - 2A Rua Souza Prado,Extra services,4.44,0.0,0.0,0.0,N/A,N/A,N/A,{},https://park4night.com/en/place/163064,2026-01-20 00:09:45
+483605,(7520-001) Sines - Unnamed Road,Parking lot day/night,5,0.0,0.0,0.0,10,N/A,N/A,{},https://park4night.com/en/place/483605,2026-01-20 00:08:37
+372698,(7630-174) Odemira - 2b Rua Capitão Salgueiro Maia,Service area without parking,3.76,0.0,0.0,0.0,N/A,N/A,N/A,{},https://park4night.com/en/place/372698,2026-01-20 00:08:30
+611380,(8670) Odeceixe - Unnamed Road,Parking lot day/night,2.83,0.0,0.0,0.0,4,N/A,N/A,{},https://park4night.com/en/place/611380,2026-01-20 00:07:23
+361231,(7520-206) Sines - Unnamed Road,MH parking without services,4.1,0.0,0.0,0.0,3,N/A,N/A,{},https://park4night.com/en/place/361231,2026-01-20 00:06:46
+50070,(7570) Minas do Lousal - 210 Rua 25 Abril,Free motorhome area,4.28,0.0,0.0,0.0,12,N/A,N/A,{},https://park4night.com/en/place/50070,2026-01-20 00:06:08
+45490,(7565) Alvalade - 15 Rua de São Pedro,Parking lot day/night,3.5,0.0,0.0,0.0,N/A,N/A,N/A,{},https://park4night.com/en/place/45490,2026-01-20 00:06:00
+322957,(7670) Casas Velhas -,Homestays accommodation,5,0.0,0.0,0.0,2,N/A,N/A,{},https://park4night.com/en/place/322957,2026-01-20 00:04:22
+341235,(7540) Santiago do Cacém - 14 Estrada do Fidalgo,MH parking without services,3.95,0.0,0.0,0.0,3,N/A,N/A,{},https://park4night.com/en/place/341235,2026-01-20 00:04:15
+418320,(7670-215) Green Oaks Alentejo,"On the farm (farm, vineyard ...)",4.94,0.0,0.0,0.0,3,N/A,N/A,{},https://park4night.com/en/place/418320,2026-01-20 00:04:08
+167507,(7630-174) São Teotónio - N120,Extra services,4.25,0.0,0.0,0.0,N/A,N/A,N/A,{},https://park4night.com/en/place/167507,2026-01-20 00:04:00
+556029,(7630-574) Quinta Vicentina,Private car park for campers,4.9,0.0,0.0,0.0,12,N/A,N/A,{},https://park4night.com/en/place/556029,2026-01-20 00:03:23
+30443.0,"Parque De Campismo São Miguel
 
 Located in the Costa Vicentina Natural Park, the campsite offers a beautiful pine forest, very quiet, ideal to spend a good time near one of the best beaches, Odeceixe, and is a strategic place if you are hiking or cycling in the region. Friendly staff and great facilities including a very nice restaurant and a great swimming pool! Pets are only allowed in the low season .
 
@@ -10,8 +175,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/30443
-553945,"Odemira -
+★",,,,,,,,,,https://park4night.com/en/place/30443,
+553945.0,"Odemira -
 
 For campers we offer a pitch in the middle of nature on a hill in the beautiful Alentejo. It can be reached via a 5km long dirt road, which is easy to drive on when it is not raining too heavily. The site is in the shade of a beautiful cork oak and is about 500 meters from our 2 inhabited houses. We live on the property with 4 free-roaming, peaceful, bright and sociable dogs who, apart from greeting our guests, mostly stay near the house. The area offers: Odemira about 20 minutes by car, Sao Luis about 15 minutes by car, the sea about 30 minutes by car, hiking trails , access to Pego das Pias
 
@@ -21,9 +186,9 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/553945
-N/A,ADVERTISING,https://park4night.com#
-372698,"Odemira - 2b Rua Capitão Salgueiro Maia
+★",,,,,,,,,,https://park4night.com/en/place/553945,
+,ADVERTISING,,,,,,,,,,https://park4night.com#,
+372698.0,"Odemira - 2b Rua Capitão Salgueiro Maia
 
 Euro Relais Station at Intermarche, washing machine and dryer available.
 
@@ -33,8 +198,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/372698
-118590,"Odemira - Unnamed Road
+★",,,,,,,,,,https://park4night.com/en/place/372698,
+118590.0,"Odemira - Unnamed Road
 
 Large unpaved parking area next to the Intermarche. Almost flat, view of the surrounding area and flock of sheep in front of the door. However, it is loud. Loud music, dog barking and cat screaming and early in the morning, the Intermarche supplying trucks, allowed us only a little sleep.
 
@@ -44,9 +209,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/118590
-N/A,ADVERTISING,https://park4night.com#
-163064,"Odemira - 2A Rua Souza Prado
+★",,,,,,,,,,https://park4night.com/en/place/118590,
+163064.0,"Odemira - 2A Rua Souza Prado
 
 Clean, public toilets with hot showers.
 
@@ -56,8 +220,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/163064
-476938,"Odemira - 13 Rua das Barreiras Vermelhas
+★",,,,,,,,,,https://park4night.com/en/place/163064,
+476938.0,"Odemira - 13 Rua das Barreiras Vermelhas
 
 On the banks of the Rio Mira. It's a perfectly normal and exceptionally quiet parking area where campervans are tolerated, provided they are self-sufficient! Odemira has created a beautiful spot here. Located directly on the river, with park-like grounds and sun umbrellas on the riverside lawn, it's a lovely place to relax. The new pedestrian bridge provides quick access to the town. An art exhibition on the opposite bank is one of the attractions. On a hilltop stands a 12.5m x 6m sculpture, the Monumento ao Cante Alentejano, depicting a regionally typical choir, which is a UNESCO World Heritage Site. Bars, pubs, a supermarket, two gas stations, and several other shops complete the offerings.
 
@@ -67,9 +231,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/476938
-N/A,ADVERTISING,https://park4night.com#
-424712,"Odemira - R. César Mirandas
+★",,,,,,,,,,https://park4night.com/en/place/476938,
+424712.0,"Odemira - R. César Mirandas
 
 Public toilets, no showers, very clean. It is located next to the Mira river, where you can walk along its banks with ducks.
 
@@ -79,8 +242,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/424712
-559722,"Odemira - 20 Alto de São Sebastião
+★",,,,,,,,,,https://park4night.com/en/place/424712,
+559722.0,"Odemira - 20 Alto de São Sebastião
 
 Public fountain with a water tap. Approx. 150m to the two windmills. During our visit, the water tap provided sufficient water volume
 
@@ -90,9 +253,8 @@ Photos
 Comments
 0
 Rating
-★",https://park4night.com/en/place/559722
-N/A,ADVERTISING,https://park4night.com#
-490873,"Odemira - N123
+★",,,,,,,,,,https://park4night.com/en/place/559722,
+490873.0,"Odemira - N123
 
 Faucet with a lot of pressure, large thread, 10m away from the road, inaccessible with the van, you need a 10m hose, there is a narrow place to park, large thread
 
@@ -102,8 +264,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/490873
-113748,"Santa Maria - Rua do Cemitério
+★",,,,,,,,,,https://park4night.com/en/place/490873,
+113748.0,"Santa Maria - Rua do Cemitério
 
 Parking on the edge of Odemira. On foot you can easily reach the center. Now and then you hear a few dogs barking, otherwise it is nice and quiet. No services. Update March 17th 2022: now 3 places reserved for campervans 
 
@@ -113,9 +275,8 @@ Photos
 Comments
 3
 Rating
-★",https://park4night.com/en/place/113748
-N/A,ADVERTISING,https://park4night.com#
-99805,"Odemira - N393
+★",,,,,,,,,,https://park4night.com/en/place/113748,
+99805.0,"Odemira - N393
 
 Lidl in Odemira with special day parking space for motorhomes. Self-service washing machines on site.
 
@@ -125,8 +286,8 @@ Photos
 Comments
 3
 Rating
-★",https://park4night.com/en/place/99805
-482151,"Odemira - Avenida do Sul
+★",,,,,,,,,,https://park4night.com/en/place/99805,
+482151.0,"Odemira - Avenida do Sul
 
 PERNOITA  max 24h quiet, lit, good WiFi signal
 
@@ -136,9 +297,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/482151
-N/A,ADVERTISING,https://park4night.com#
-495742,"Odemira - IC4
+★",,,,,,,,,,https://park4night.com/en/place/482151,
+495742.0,"Odemira - IC4
 
 Looks abandoned but has water.
 
@@ -148,8 +308,8 @@ Photos
 Comments
 2
 Rating
-★",https://park4night.com/en/place/495742
-89145,"Bp petromira
+★",,,,,,,,,,https://park4night.com/en/place/495742,
+89145.0,"Bp petromira
 
 Only one gas station with the possibility of water to bunkers. No disposal !!!
 
@@ -159,9 +319,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/89145
-N/A,ADVERTISING,https://park4night.com#
-304594,"São Luís - 1 N120
+★",,,,,,,,,,https://park4night.com/en/place/89145,
+304594.0,"São Luís - 1 N120
 
 Water filling area with the possibility of screwing an adapter to connect a hose
 
@@ -171,8 +330,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/304594
-423981,"São Luís - 1 N120
+★",,,,,,,,,,https://park4night.com/en/place/304594,
+423981.0,"São Luís - 1 N120
 
 Public toilets with drinking water. The bathrooms have frequent cleaning maintenance and are provided with toilet paper. Nearby you can park and spend the night quietly.
 
@@ -182,9 +341,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/423981
-N/A,ADVERTISING,https://park4night.com#
-393976,"São Luís - 24 Rua Liga dos Amigos
+★",,,,,,,,,,https://park4night.com/en/place/423981,
+393976.0,"São Luís - 24 Rua Liga dos Amigos
 
 Small laundromat on site. Machine for changing banknotes. Directly opposite is a larger supermarket.
 
@@ -194,8 +352,8 @@ Photos
 Comments
 0
 Rating
-★",https://park4night.com/en/place/393976
-109040,"São Luís - 4 Rua Liga dos Amigos
+★",,,,,,,,,,https://park4night.com/en/place/393976,
+109040.0,"São Luís - 4 Rua Liga dos Amigos
 
 Small parking close to the city center. Quiet and dark.
 
@@ -205,9 +363,8 @@ Photos
 Comments
 3
 Rating
-★",https://park4night.com/en/place/109040
-N/A,ADVERTISING,https://park4night.com#
-420351,"Odemira - Unnamed Road
+★",,,,,,,,,,https://park4night.com/en/place/109040,
+420351.0,"Odemira - Unnamed Road
 
 Private place with a very nice family. The pitches are simple and free to choose from. There is a shared bathing house with a shower and composting toilet. A washing up facility is also available. For the children there is a trampoline on the property and a few meters away there is a nice little playground with a small skate park. The small downtown of São Luís is 5 minutes away by bike. A bicycle can also be rented. In São Luís there are supermarkets, bakeries, a weekly market, laundromat, pharmacy and also a doctor. It's about 15 minutes by car to the sea. Please be sure to call in advance. This is a private property with no signage. It is sometimes not possible to park here, especially in winter.
 
@@ -217,8 +374,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/420351
-556029,"Quinta Vicentina
+★",,,,,,,,,,https://park4night.com/en/place/420351,
+556029.0,"Quinta Vicentina
 
 Nearby Beautiful Places in Portugal 3.5 km from Tonel Beach, 5 km from Carraca Beach, 7 km from Nossa Senhora Beach, Zambujeira Beach from the sea, 8 km from Almograve Beach. We offer clothes washing machine, electricity, clean water, waste disposal, bath and shower house.
 
@@ -228,9 +385,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/556029
-N/A,ADVERTISING,https://park4night.com#
-267275,"- 10 Praça dos Fuzileiros
+★",,,,,,,,,,https://park4night.com/en/place/556029,
+267275.0,"- 10 Praça dos Fuzileiros
 
 Public toilets with parking nearby WiFi acess Good to go by bike or foot to the beach were you can take a shower...
 
@@ -240,8 +396,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/267275
-496083,"Luzianes - R. da Estação
+★",,,,,,,,,,https://park4night.com/en/place/267275,
+496083.0,"Luzianes - R. da Estação
 
 Public toilets and hot shower!
 
@@ -251,9 +407,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/496083
-N/A,ADVERTISING,https://park4night.com#
-632653,"Longueira/Almograve - Acesso à parte inferior da ponte
+★",,,,,,,,,,https://park4night.com/en/place/496083,
+632653.0,"Longueira/Almograve - Acesso à parte inferior da ponte
 
 Zone P is lower down. We had dinner and spent the night. In the morning, the GNR arrived, greeted us, but didn't say anything. It's a quiet parking lot next to the river below the bridge. We tried the one above, which is also flat, but cars kept passing by, so we decided to go there. It's a rough dirt road that seems steep, but with the 7.60m AC, we made it down and up just fine.
 
@@ -263,8 +418,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/632653
-329349,"Beja - M532
+★",,,,,,,,,,https://park4night.com/en/place/632653,
+329349.0,"Beja - M532
 
 Public washing machine with dryer. Enclosed public toilets with integrated showers . Right next door an ATM .
 
@@ -274,9 +429,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/329349
-N/A,ADVERTISING,https://park4night.com#
-97590,"Odemira - 3 Rua Do Comercio
+★",,,,,,,,,,https://park4night.com/en/place/329349,
+97590.0,"Odemira - 3 Rua Do Comercio
 
 Free public showers and toilets, very clean. The bathrooms are unixes. It has an electricity outlet. Next to garbage containers. Next to the car park there is a picnic table.
 
@@ -286,8 +440,8 @@ Photos
 Comments
 3
 Rating
-★",https://park4night.com/en/place/97590
-614744,"Vila Nova de Milfontes - Rua Custódio Brás Pacheco
+★",,,,,,,,,,https://park4night.com/en/place/97590,
+614744.0,"Vila Nova de Milfontes - Rua Custódio Brás Pacheco
 
 Fresh water and ice dispensers available 24/7. Ice cubes: €3 for 3 kg
 
@@ -297,9 +451,8 @@ Photos
 Comments
 2
 Rating
-★",https://park4night.com/en/place/614744
-N/A,ADVERTISING,https://park4night.com#
-398761,"Luzianes - Vale Cernes
+★",,,,,,,,,,https://park4night.com/en/place/614744,
+398761.0,"Luzianes - Vale Cernes
 
 Please call in advance! or WhatsApp. See number in the contact section. We are a German family with two children, ages 10 and 8, and we emigrated to Portugal in May 2022. We are renovating our old Portuguese mud house ourselves, using natural materials such as clay and lime. You can park and relax in a beautiful spot away from the house  surrounded by nature. A trampoline for children's fun is also available. Enjoy the relaxation and peace! Good internet connection available. Are you interested in mud construction or life in Portugal? Do you want to emigrate yourself, perhaps with children, and have questions about emigrating, buying a house, bureaucracy, etc. If time permits, we would be happy to take an hour to answer all your questions. The exchange of experiences is not included in the overnight price. Overnight stay without exchange of experiences: €10. Overnight stay with exchange of experiences: €50.  Location: In the village of Luzianes, there is a small shop for basics . There is a public shower/restroom that you can use. The Santa Clara Reservoir is great for swimming and hiking; it's about a 15-minute drive away. In Santa Clara, there is a gas station, two supermarkets, a café, and a post office. Anyone passing through with a self-sufficient vehicle is welcome, even for longer stays, by arrangement. Pets are welcome :) , but the area is not fenced. If you have any questions, just let me know ❤️ Lydia and Max
 
@@ -309,8 +462,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/398761
-217743,"Vila Nova de Milfontes - 28 Rua António Mantas
+★",,,,,,,,,,https://park4night.com/en/place/398761,
+217743.0,"Vila Nova de Milfontes - 28 Rua António Mantas
 
 Public toilet, open from 8 a.m. to 7 p.m. Clean affair
 
@@ -320,9 +473,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/217743
-N/A,ADVERTISING,https://park4night.com#
-406938,"Vila Nova de Milfontes - 6 N390
+★",,,,,,,,,,https://park4night.com/en/place/217743,
+406938.0,"Vila Nova de Milfontes - 6 N390
 
 Gas station with some car washes. Our camper fitted underneath, 2.35 wide, 3.20 high and 9.30 long. I washed my solar panels with my own room
 
@@ -332,8 +484,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/406938
-224770,"Vila Nova de Milfontes - 45 Rua do Moinho de Vento
+★",,,,,,,,,,https://park4night.com/en/place/406938,
+224770.0,"Vila Nova de Milfontes - 45 Rua do Moinho de Vento
 
 Point of sale  Sale of campingaz bottles  and refill against old empty bottle
 
@@ -343,9 +495,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/224770
-N/A,ADVERTISING,https://park4night.com#
-647436,"Vila Nova de Milfontes - R. António Mantas
+★",,,,,,,,,,https://park4night.com/en/place/224770,
+647436.0,"Vila Nova de Milfontes - R. António Mantas
 
 According to the GNR, overnight camping is permitted at this simple gravel parking lot. No facilities other than trash cans nearby. A good starting point for exploring the town and the fortress.
 
@@ -355,8 +506,8 @@ Photos
 Comments
 1
 Rating
-★",https://park4night.com/en/place/647436
-395390,"Vila Nova de Milfontes - 26 E Rua Artur Horta
+★",,,,,,,,,,https://park4night.com/en/place/647436,
+395390.0,"Vila Nova de Milfontes - 26 E Rua Artur Horta
 
 Another laundromat right near the Rio Laundromat. Machine prices a little cheaper. But no Miele machines.
 
@@ -366,9 +517,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/395390
-N/A,ADVERTISING,https://park4night.com#
-110869,"- Unnamed Road
+★",,,,,,,,,,https://park4night.com/en/place/395390,
+110869.0,"- Unnamed Road
 
 Self-service launderette at Intermarche supermarket, in the car park in front of the shop entrance. Only one of each machine so we had to wait for half an hour to use. Only takes change. There is also a coffee shop and toilets in the shop as well.
 
@@ -378,8 +528,8 @@ Photos
 Comments
 3
 Rating
-★",https://park4night.com/en/place/110869
-111308,"Vila Nova de Milfontes - Rua do Moinho de Vento Loja 13
+★",,,,,,,,,,https://park4night.com/en/place/110869,
+111308.0,"Vila Nova de Milfontes - Rua do Moinho de Vento Loja 13
 
 Lavarie self service, with opening hours from 9h to 20h. We were there on a Sunday and it was closed.
 
@@ -389,9 +539,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/111308
-N/A,ADVERTISING,https://park4night.com#
-303940,"Vila Nova de Milfontes - 29 Rua Das Pousadas
+★",,,,,,,,,,https://park4night.com/en/place/111308,
+303940.0,"Vila Nova de Milfontes - 29 Rua Das Pousadas
 
 Ample parking spaces next to the soccer field. Public fountain and toilet
 
@@ -401,8 +550,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/303940
-24042,"Campiférias
+★",,,,,,,,,,https://park4night.com/en/place/303940,
+24042.0,"Campiférias
 
 Place on a street, which hardly disturbs. We wanted to stay 2 nights and ended up staying 11 nights. Everything fits here, the market hall opposite the entrance, a launderette, Spar and a Portuguese supermarket 200m away. Very nice place, great cheap restaurants, very nice people everywhere. The sea is within walking distance, we had the bikes with us. Great backcountry. Sanitary older but good and clean. A plus for us, there are no dogs on the site. Value for money is good here.
 
@@ -412,9 +561,8 @@ Photos
 Comments
 3
 Rating
-★",https://park4night.com/en/place/24042
-N/A,ADVERTISING,https://park4night.com#
-30087,"Camping Milfontes
+★",,,,,,,,,,https://park4night.com/en/place/24042,
+30087.0,"Camping Milfontes
 
 Campsite with all services. Places pleasantly large and demarcated with bushes. dogs on a leash. Well equipped supermarket with moderate prices. Surrounded by terraced houses. Sanitary facilities are large and clean, but not the most modern. Not every faucet intact. Only two toilets are open off-season. Acti 16
 
@@ -424,8 +572,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/30087
-486292,"S.Teotónio - Unnamed Road
+★",,,,,,,,,,https://park4night.com/en/place/30087,
+486292.0,"S.Teotónio - Unnamed Road
 
 A bulge on a slope that is easy to drive on. Very quiet. Outside the nature reserve. Slightly shady
 
@@ -435,9 +583,8 @@ Photos
 Comments
 3
 Rating
-★",https://park4night.com/en/place/486292
-N/A,ADVERTISING,https://park4night.com#
-496539,"Zambujeira do Mar - 22 Entrada da Barca
+★",,,,,,,,,,https://park4night.com/en/place/486292,
+496539.0,"Zambujeira do Mar - 22 Entrada da Barca
 
 Drinking water, water supply
 
@@ -447,8 +594,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/496539
-165654,"Santiago do Cacém - Unnamed Road
+★",,,,,,,,,,https://park4night.com/en/place/496539,
+165654.0,"Santiago do Cacém - Unnamed Road
 
 Fresh water, tastes like Champagnem! Really good.
 
@@ -458,9 +605,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/165654
-N/A,ADVERTISING,https://park4night.com#
-96477,"Aguas Vivas
+★",,,,,,,,,,https://park4night.com/en/place/165654,
+96477.0,"Aguas Vivas
 
 Beautiful, well-maintained pitch. Level gravel area, clean restrooms , water and waste disposal. The operator is German and speaks Portuguese and English. Children up to 10 years old are free, with an additional charge per person. Shower and bathroom included in the price. Electricity on site, internet. No card payments.
 
@@ -470,8 +616,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/96477
-589090,"Vila Nova de Milfontes -
+★",,,,,,,,,,https://park4night.com/en/place/96477,
+589090.0,"Vila Nova de Milfontes -
 
 Beautiful, quiet, and spacious campervan site, 3 km from the coast, with no amenities. Campers with trailers and self-contained caravans are welcome. Parking is available. Dogs are allowed.
 
@@ -482,21 +628,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/589090
-N/A,ADVERTISING,https://park4night.com#
-589090,"Vila Nova de Milfontes -
-
-Beautiful, quiet, and spacious campervan site, 3 km from the coast, with no amenities. Campers with trailers and self-contained caravans are welcome. Parking is available. Dogs are allowed.
-
- Easy online booking
-5
-Photos
-28
-Comments
-5
-Rating
-★",https://park4night.com/en/place/589090
-8637,"Camping Villa Park Zambujeira
+★",,,,,,,,,,https://park4night.com/en/place/589090,
+8637.0,"Camping Villa Park Zambujeira
 
 The place is truly amazing, beautifully landscaped under the eucalyptus trees, the staff is friendly, and the restrooms are clean! Truly excellent value for money!
 
@@ -506,9 +639,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/8637
-N/A,ADVERTISING,https://park4night.com#
-314760,"Cercal do Alentejo - Estrada de Colos
+★",,,,,,,,,,https://park4night.com/en/place/8637,
+314760.0,"Cercal do Alentejo - Estrada de Colos
 
 Free parking in front of sports area. Quiet at night. Close to city centre. BP gas station near by.
 
@@ -518,8 +650,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/314760
-414156,"Chaparral - Unnamed Road
+★",,,,,,,,,,https://park4night.com/en/place/314760,
+414156.0,"Chaparral - Unnamed Road
 
 Black and grey water dumping. Fresh water refill point. Right next to Junta de Freguesia do Cercal. Cost free
 
@@ -529,9 +661,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/414156
-N/A,ADVERTISING,https://park4night.com#
-460498,"Zambujeira do Mar - 5 Rua Joao Pedro da Costa
+★",,,,,,,,,,https://park4night.com/en/place/414156,
+460498.0,"Zambujeira do Mar - 5 Rua Joao Pedro da Costa
 
 Public toilet next to the beach.
 
@@ -541,8 +672,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/460498
-311155,"Camping Corgo do Pardieiro
+★",,,,,,,,,,https://park4night.com/en/place/460498,
+311155.0,"Camping Corgo do Pardieiro
 
 Treasure of nature Amoreiras gare 7630-514  Under the enormous stars and hidden among the hills of South west Portugal you can find our ‘ Treasure of Nature ‘. A 8.5-hectare nature park which invites you to be with yourself in nature. A place where you can make endless walks, visit the beautiful beaches, get quiet by the wide views, read a good book in one of the hammocks or … just do absolutely nothing.
 
@@ -552,9 +683,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/311155
-N/A,ADVERTISING,https://park4night.com#
-439205,"Zambujeira do Mar - Unnamed Road
+★",,,,,,,,,,https://park4night.com/en/place/311155,
+439205.0,"Zambujeira do Mar - Unnamed Road
 
 Public bathrooms with the possibility of showers. Hours 10 - 19.
 
@@ -564,8 +694,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/439205
-167507,"São Teotónio - N120
+★",,,,,,,,,,https://park4night.com/en/place/439205,
+167507.0,"São Teotónio - N120
 
 Natural spring. Drinking water tap used by locals to refill water bottles. You can park by the road and walk about 30 meters to the little building in which the tap is located. Really clean drinking water, without chloride!
 
@@ -575,9 +705,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/167507
-N/A,ADVERTISING,https://park4night.com#
-317945,"Colos - 2 N389
+★",,,,,,,,,,https://park4night.com/en/place/167507,
+317945.0,"Colos - 2 N389
 
 In a small village, parking space in the center, but a container, drinking water tap, washing bike and toilet.
 
@@ -587,8 +716,8 @@ Photos
 Comments
 3
 Rating
-★",https://park4night.com/en/place/317945
-400293,"Flor do Brejo
+★",,,,,,,,,,https://park4night.com/en/place/317945,
+400293.0,"Flor do Brejo
 
 Rugged coast, beautiful beaches  and a characteristic hinterland with cork oaks, olive trees and cows on the field. On our Flor do Brejo estate you will experience peace, Portuguese country life and marvel at the beautiful skies and the grand starry sky. Stay with us at Flor do Brejo and discover the Alentejo with the Costa Vicentina. If you email us or send us a message via WhatsApp, you know for sure whether there is room.
 
@@ -598,9 +727,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/400293
-N/A,ADVERTISING,https://park4night.com#
-40034,"Orbitur Camping Park - Sitava Milfontes
+★",,,,,,,,,,https://park4night.com/en/place/400293,
+40034.0,"Orbitur Camping Park - Sitava Milfontes
 
 Campsite Orbitur Sitava Milfontes The campsite is pleasant, offers plenty of shade and is only 600 m from the beach. It has own supermarket, snack-bar and restaurant. The campsite also has TV room, game area, tennis court, outdoor fitness circuit, children’s playground and a great swimming pool. It is equipped with sanitary blocks with hot water and a utility room with washing machines and sinks. It has 30 ha and pitching areas for tents, caravans and camping cars
 
@@ -610,8 +738,8 @@ Photos
 Comments
 3
 Rating
-★",https://park4night.com/en/place/40034
-119482,"Santa Clara -a -Velha - 3 Pç. Doutor Oliveira Salazar
+★",,,,,,,,,,https://park4night.com/en/place/40034,
+119482.0,"Santa Clara -a -Velha - 3 Pç. Doutor Oliveira Salazar
 
 Very clean toilet and toilet. Shower costs €1.00. Nice and hot and lots of pressure. You will find an ATM around the corner. It is better to park your motorhome in the official parking space. It's tight here.
 
@@ -621,9 +749,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/119482
-N/A,ADVERTISING,https://park4night.com#
-88957,"Monte Carvalhal da Rocha
+★",,,,,,,,,,https://park4night.com/en/place/119482,
+88957.0,"Monte Carvalhal da Rocha
 
 Quiet campsite with beautiful swimming pool, bar and restaurant. Shaded area under the pines and partial shade under the eucaliptus. Beach at 400m. Magnificent hike to Odeseixe.
 
@@ -633,8 +760,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/88957
-476338,"São Martinho das Amoreiras - 26 Rua do Algarve
+★",,,,,,,,,,https://park4night.com/en/place/88957,
+476338.0,"São Martinho das Amoreiras - 26 Rua do Algarve
 
 Water without chlorine directly from the rock. You can park right next to it. Tap without thread.
 
@@ -644,9 +771,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/476338
-N/A,ADVERTISING,https://park4night.com#
-299555,"Monte Maravilhas
+★",,,,,,,,,,https://park4night.com/en/place/476338,
+299555.0,"Monte Maravilhas
 
 Simple beautiful campsite located in a valley. You come here for your rest. Lovely swimming pool filled with spring water. Nice loungers around it. Beautiful walking and cycling area. Nice village oo walking distance. Clean and simple sanitary facilities.
 
@@ -656,8 +782,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/299555
-575585,"São Martinho das Amoreiras - 2 Rua do Bairro Social
+★",,,,,,,,,,https://park4night.com/en/place/299555,
+575585.0,"São Martinho das Amoreiras - 2 Rua do Bairro Social
 
 Parking at the side of a very quiet road further up the road from the village bins. Lovely village with friendly locals. 100m down the road there are public toilets and a drinking water tap in the village. A highly rated restaurant. ATM. Cafe/bars. Starting point to a great hiking route.
 
@@ -667,9 +793,8 @@ Photos
 Comments
 0
 Rating
-★",https://park4night.com/en/place/575585
-N/A,ADVERTISING,https://park4night.com#
-196086,"São Teotónio -
+★",,,,,,,,,,https://park4night.com/en/place/575585,
+196086.0,"São Teotónio -
 
 A wonderful, sweet little country with a German-Portuguese family. Water is available, but NOT drinkable. The owners are very friendly and helpful with any questions. You can buy essentials in the nearby small town. The beaches and bays are absolutely dreamy. The owners are happy to advise you in English, German, and Portuguese. Eggs can be purchased on the farm.  We felt very comfortable and will definitely come back. There is NO hot shower, NO toilets, or waste disposal! Please use the email address to contact us. If no one is there, simply go through the gate and knock on the white glass door on the right. !!We would also like to ask those arriving with dogs to please keep their dogs on a leash!!
 
@@ -679,8 +804,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/196086
-188426,"- Unnamed Road
+★",,,,,,,,,,https://park4night.com/en/place/196086,
+188426.0,"- Unnamed Road
 
 Public park in a quiet area. Ideal to spend the night near the beach without taking fines
 
@@ -690,9 +815,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/188426
-N/A,ADVERTISING,https://park4night.com#
-548762,"Santa Bárbara -
+★",,,,,,,,,,https://park4night.com/en/place/188426,
+548762.0,"Santa Bárbara -
 
 Welcome to Monte do Ruivo camper site! We offer a peaceful and secure space for a few campers, with basic amenities such as electricity, waste disposal, and temporary Wi-Fi available for special occasions. Our site boasts a beautiful landscape and a stunning night sky. As a former camper driver, I understand the importance of a secure and restful place to stay. We're working on adding more amenities for future campers to enhance your experience. Please respect the natural surroundings. In case you have dog please keep him on a leash during your stay. For now we only allow max 3 nights. Enjoy your visit, and we look forward to seeing you soon!
 
@@ -702,8 +826,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/548762
-177331,"Quinta do Rossi - Caravan Park
+★",,,,,,,,,,https://park4night.com/en/place/548762,
+177331.0,"Quinta do Rossi - Caravan Park
 
 Welcome to Quinta do Rossi! We have a small caravan park where you can use our services such as electricity, toilets with hot shower, water points, lounges and common room with washing machine, tables, sinks, fridge, microwave and wifi for free. You can also find fresh organic products - wine, olive oil - and fresh seasonal vegetables for sale. Animals are allowed for an additional fee . The beach is 5 minutes by car and 40 minutes on foot. Check out our profile for more information. See you soon! | WE DO NOT RESERVE IN ORDER OF ARRIVAL. PARK OPENING HOURS: 9am to 9pm. Checkin after 9pm possible by registering at the gate. Costs 10 euros extra!
 
@@ -714,21 +838,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/177331
-N/A,ADVERTISING,https://park4night.com#
-177331,"Quinta do Rossi - Caravan Park
-
-Welcome to Quinta do Rossi! We have a small caravan park where you can use our services such as electricity, toilets with hot shower, water points, lounges and common room with washing machine, tables, sinks, fridge, microwave and wifi for free. You can also find fresh organic products - wine, olive oil - and fresh seasonal vegetables for sale. Animals are allowed for an additional fee . The beach is 5 minutes by car and 40 minutes on foot. Check out our profile for more information. See you soon! | WE DO NOT RESERVE IN ORDER OF ARRIVAL. PARK OPENING HOURS: 9am to 9pm. Checkin after 9pm possible by registering at the gate. Costs 10 euros extra!
-
- Easy online booking
-5
-Photos
-439
-Comments
-5
-Rating
-★",https://park4night.com/en/place/177331
-572641,"Monte Parreira
+★",,,,,,,,,,https://park4night.com/en/place/177331,
+572641.0,"Monte Parreira
 
 Advance reservation required. We look forward to welcoming you to Monte Parreira. Monte Parreira is a high-altitude property near São Teotónio with wonderful views over part of the Alentejo. We are happy to provide one or two overnight pitches free of charge. Access is no problem for four-wheel drive vehicles; others need sufficient weight on the drive axle to negotiate the steeper sections of the approach without difficulty. The view makes up for this. We speak German, English, Spanish, Portuguese, Greek, and Italian.
 
@@ -738,9 +849,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/572641
-N/A,ADVERTISING,https://park4night.com#
-428897,"Monte Cruz
+★",,,,,,,,,,https://park4night.com/en/place/572641,
+428897.0,"Monte Cruz
 
 We offer a pitch with water & electricity and the magnificent view of the rolling hills of the Alentejo and the lake of Monte Cruz. A natural paradise is being created on 4.5 hectares of land, which is filled with a lot dedication to saving our precious commodity water and reforestation. If you are interested in learning more about the project, life in Portugal and the cycles of nature, then you are welcome to combine your stay with a Monte Tour. The access to the property includes a dirt road of about 800 m. Further services: Monte Tour 3-4 h with snacks and drinks Massage 30mins/60mins/90mins Please call before arrival or contact us via Whatsapp by phone or email If you have any questions, please write a short message. Looking forward to your stay :) 
 
@@ -750,8 +860,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/428897
-439136,"Santa Luzia - 3A Rua dos Marmeleiros
+★",,,,,,,,,,https://park4night.com/en/place/428897,
+439136.0,"Santa Luzia - 3A Rua dos Marmeleiros
 
 public toilet
 
@@ -761,9 +871,8 @@ Photos
 Comments
 1
 Rating
-★",https://park4night.com/en/place/439136
-N/A,ADVERTISING,https://park4night.com#
-633301,"São Teotónio - Rua dos Pescadores
+★",,,,,,,,,,https://park4night.com/en/place/439136,
+633301.0,"São Teotónio - Rua dos Pescadores
 
 Charming fishing village with a fishing tackle shop and a restaurant serving excellent food. It has spectacular views.
 
@@ -773,8 +882,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/633301
-485927,"Baranco de Vale Francisco -
+★",,,,,,,,,,https://park4night.com/en/place/633301,
+485927.0,"Baranco de Vale Francisco -
 
 Greetings traveller, We are a small family with dog, chicken and a lovely retreat-like quinta in beautiful Alentejo. There is a little lake to swim and a garden to be built ? The whole area is beautiful to have walks, biking tours, trips to the west and south coast... We love to prepare our own bread, pizza, cakes and other delicious snacks. For people asking we got various breakfast offers. there are only one or two parking spots so please contact us before you come! looking forward to meet you ☺️ if you help us in the garden and household u can stay for free. just ask if we need help at the moment.
 
@@ -784,9 +893,8 @@ Photos
 Comments
 0
 Rating
-★",https://park4night.com/en/place/485927
-N/A,ADVERTISING,https://park4night.com#
-412703,"Monte Huam Hu
+★",,,,,,,,,,https://park4night.com/en/place/485927,
+412703.0,"Monte Huam Hu
 
 Imagine waking up to the fresh morning air, surrounded by lush greenery as far as the eye can see. You step out of your motorhome and enjoy the breathtaking view of the valley - a sight so magnificent it looks like it came straight from a postcard. Welcome to Monte Huam Hu, a campsite that offers not only a place to park your motorhome, but an experience that will amaze you. The space may be simple, but it offers everything you need for a comfortable stay. From water  to electricity and WiFi access just steps away, you don't have to worry about anything other than immersing yourself in the beauty that surrounds you. Take a walk through the valley and explore the nearby hills. Find the perfect spot to lie in a hammock in the shade and enjoy the peace that nature offers. With plenty of areas to sit and relax, you'll never tire of taking in the breathtaking views. Since there is no air pollution in Monte Huam Hu, the night sky is truly a breathtaking sight. Make Monte Huam Hu your second home and escape the hustle and bustle of everyday life. This is where peace lives and memories are created. Don't miss this incredible opportunity to discover one of nature's true wonders! The site does not offer landfill. Solar power is only available during the day. Please contact us before your visit!
 
@@ -796,8 +904,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/412703
-303459,"Casas novas da Palmeira
+★",,,,,,,,,,https://park4night.com/en/place/412703,
+303459.0,"Casas novas da Palmeira
 
 Our farm is located in the Portuguese ""Outback"", on a plateau with beautiful views. On the one side you can see the mountain of the Monchique and on the other side the ocean If you love nature and animals pure clean air you've come to the right place. Perfect for unwinding and relaxing. Take a swim in the lake or hang around the Poolhouse  with hammacks, table tennis, outdoor kitchen, darts, bbq, wifi and workspace. At night you only hear the calls of foxes, owls and nightingales. The closest beach is 25 minutes away.  The closest bigger town is Sao Teotonio, about 20 minutes by car. If you like to come please just send a message to my whatsapp number. Thank you so much and see you soon:) ate ja ) through the forest with lots of wholes ! If I dont answer self check in possible. Just drive until the table tennis.  park there and discover by foot where is the best for you to park.
 
@@ -807,9 +915,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/303459
-N/A,ADVERTISING,https://park4night.com#
-643948,"São Teotónio - Unnamed Road
+★",,,,,,,,,,https://park4night.com/en/place/303459,
+643948.0,"São Teotónio - Unnamed Road
 
 Stayed here for one night after we arrived too late to check-in on the camping or other options. Not charming at all , but fine considering the lack of options in this area.
 
@@ -819,8 +926,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/643948
-603985,"NM - Natured Minds
+★",,,,,,,,,,https://park4night.com/en/place/643948,
+603985.0,"NM - Natured Minds
 
 Warm welcome to Quinta NM  A natureful farm stay for you who long to retreat into nature and experience off-grid living. Nestled in the mountains above Odeceixe, close to Aljezur, Monchique and São Teótonio, our space offers refreshing lake swims and gravelled pitches overlooking the wild coast of the Costa Vicentina Natural Park. Whether you’re looking for an overnight stay or a deeper pause in nature, you are warmly welcome to land, ground, and rediscover your connection with the natural world. A vast land of biodiversity awaits you – among cork oaks, wild olive trees, rock roses, pine trees and fruit tree orchards. You can park next to our lake and ground yourself on your private earth terrace, or choose our mountain plateau – both with breathtaking sea views on a clear day. Fall asleep to frog lullabies, awake to birdsong, enjoy free access to fresh water and seasonal greens, play and relax by the lake beach of your choice, unwind in the chill out forest, and watch the sunset on your terrace. We are gently developing a regenerative living space based on permaculture – a place to reconnect people with nature for both human and planetary well-being. Your stay supports this vision and invites you to nature your mind to nurture your soul. ⸻ What we offer: • Panoramic sea and mountain views • Accessible parking on our mountain plateau or next to our grounding earth terraces and ruin facilities  • Access to fresh water • Shaded outdoor living room • Forest chill-out area • A freshwater lake • Recycling and compost station • Fire-free safety zone • Pets welcome  ⸻ Stay details: • Contact us beforehand to reserve your spot and to receive route recommendations. Please note that the gps doesn’t always show the best road. From the north and west the best road is through the north entry of São Teotónio. From the south the best is through Aljezur in direction to Marmelete - Selão - São Teotónio. From the east through Marmelete towards São Teotónio.
 
@@ -830,9 +937,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/603985
-N/A,ADVERTISING,https://park4night.com#
-364858,"Odemira - Ameixeira, EM 503
+★",,,,,,,,,,https://park4night.com/en/place/603985,
+364858.0,"Odemira - Ameixeira, EM 503
 
 Very quiet, idyllic place with donkeys and chickens, surrounded by rolling hills and forests, in the heart of the Alentejo. Families with children are welcome. In the vicinity there are various possibilities for leisure activities such as hiking, swimming , bike tours, motocross and more. Shower, water toilet and WiFi are available. Prior registration by telephone required.
 
@@ -842,8 +948,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/364858
-611380,"Odeceixe - Unnamed Road
+★",,,,,,,,,,https://park4night.com/en/place/364858,
+611380.0,"Odeceixe - Unnamed Road
 
 On the outskirts of Odeceixe, 50 meters from the town in a quiet vacant lot 3 km from the beach
 
@@ -853,9 +959,8 @@ Photos
 Comments
 3
 Rating
-★",https://park4night.com/en/place/611380
-N/A,ADVERTISING,https://park4night.com#
-185459,"Parque de Campismo da Ilha do Pessegueiro
+★",,,,,,,,,,https://park4night.com/en/place/611380,
+185459.0,"Parque de Campismo da Ilha do Pessegueiro
 
 Parque de Campismo Ilha do Pessegueiro with camping, caravans, apartments and bungalows. Overlooking the Ilha do Pessegueiro. There is mini market, restaurant, cafe/bar/snack bar, swimming pool, sanitary block. Reception is open until 9 p.m. but you can drive in until 11 p.m.
 
@@ -865,8 +970,8 @@ Photos
 Comments
 3
 Rating
-★",https://park4night.com/en/place/185459
-655835,"Odeceixe - Variante 19 de Abril
+★",,,,,,,,,,https://park4night.com/en/place/185459,
+655835.0,"Odeceixe - Variante 19 de Abril
 
 Quiet parking spaces next to a small park; benches are available. Paved, level. All you hear here are the birds chirping :)
 
@@ -876,9 +981,8 @@ Photos
 Comments
 0
 Rating
-★",https://park4night.com/en/place/655835
-N/A,ADVERTISING,https://park4night.com#
-476314,"Monte das Laranjeiras
+★",,,,,,,,,,https://park4night.com/en/place/655835,
+476314.0,"Monte das Laranjeiras
 
 Quiet motorhome parking space in a community with shared kitchen/WiFi/bathroom/toilet. Suitable for transients near Lake St. Clara and the popular town of São Martinho das Amoreiras. Only 200 m away from the asphalt road in the middle of nature.
 
@@ -888,8 +992,8 @@ Photos
 Comments
 0
 Rating
-★",https://park4night.com/en/place/476314
-464951,"Odeceixe - 31A Largo do Povo
+★",,,,,,,,,,https://park4night.com/en/place/476314,
+464951.0,"Odeceixe - 31A Largo do Povo
 
 Public bathrooms
 
@@ -899,9 +1003,8 @@ Photos
 Comments
 0
 Rating
-★",https://park4night.com/en/place/464951
-N/A,ADVERTISING,https://park4night.com#
-508399,"Odeceixe - 7 Rua das Escolas
+★",,,,,,,,,,https://park4night.com/en/place/464951,
+508399.0,"Odeceixe - 7 Rua das Escolas
 
 Caravan park. Price included electric, water and grey/ black water discharge. The facilities are basic but very close to the beach and in town. Reception works in the building next door where they have a cafe. Open from: July to September : Sunday/ Monday: 14:00- 19:00 Tuesday to Saturday: 10:00 - 19:00 October to June: Sunday/ Monday: Contact via phone Tuesday to Saturday : 14:00- 19:00
 
@@ -911,8 +1014,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/508399
-544500,"Odeceixe - 73 Rua 25 Abril
+★",,,,,,,,,,https://park4night.com/en/place/508399,
+544500.0,"Odeceixe - 73 Rua 25 Abril
 
 Clean public toilet right next to the mill. Handicapped accessible.
 
@@ -922,9 +1025,8 @@ Photos
 Comments
 0
 Rating
-★",https://park4night.com/en/place/544500
-N/A,ADVERTISING,https://park4night.com#
-434834,"Santiago do Cacém - Unnamed Road
+★",,,,,,,,,,https://park4night.com/en/place/544500,
+434834.0,"Santiago do Cacém - Unnamed Road
 
 Service place on the side of the road, it looks like it was made recently, because it is very clean. The drinking water tastes nice. Water pressure is good . The directions towards this place are clear to see on the side of the road as you get closer. Free and available 24/7, thank you to the local municipality!
 
@@ -934,8 +1036,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/434834
-222184,"Odeceixe - Rua do Recanto
+★",,,,,,,,,,https://park4night.com/en/place/434834,
+222184.0,"Odeceixe - Rua do Recanto
 
 Public toilets right next to the beach
 
@@ -945,9 +1047,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/222184
-N/A,ADVERTISING,https://park4night.com#
-556333,"Sines - 11 Rua Vitalina da Silva
+★",,,,,,,,,,https://park4night.com/en/place/222184,
+556333.0,"Sines - 11 Rua Vitalina da Silva
 
 Parking on the edge of an abandoned development zone which serves as a storage area for green waste, rubble etc.... nothing great, but the parking lots in the city center are sordid and there it is quiet.
 
@@ -957,8 +1058,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/556333
-29073,"Campsites Porto Covo
+★",,,,,,,,,,https://park4night.com/en/place/556333,
+29073.0,"Campsites Porto Covo
 
 Porto Covo, Camping with all amenities, above the parking Vasco de Gama, see prices on photo. mercado, close to fresh fish of the day, ocean to 500 m. Actual grassy pitches with hedges, really lovely hot showers.
 
@@ -968,9 +1069,8 @@ Photos
 Comments
 3
 Rating
-★",https://park4night.com/en/place/29073
-N/A,ADVERTISING,https://park4night.com#
-212659,"- 8 Beco Praia da Cerca Nova
+★",,,,,,,,,,https://park4night.com/en/place/29073,
+212659.0,"- 8 Beco Praia da Cerca Nova
 
 At tbis GALP petrol station you can fill up your water tank. Their installation has a lot of pressure. Only clean water, no grey or black.
 
@@ -980,8 +1080,8 @@ Photos
 Comments
 3
 Rating
-★",https://park4night.com/en/place/212659
-472687,"Porto Covo - 41 Rua Conde Bandeira
+★",,,,,,,,,,https://park4night.com/en/place/212659,
+472687.0,"Porto Covo - 41 Rua Conde Bandeira
 
 Laundromat 8kg cash or card. Dryers as well. Clean but busy place.
 
@@ -991,9 +1091,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/472687
-N/A,ADVERTISING,https://park4night.com#
-187368,"Porto Covo - 10 Rua Carlos Tê
+★",,,,,,,,,,https://park4night.com/en/place/472687,
+187368.0,"Porto Covo - 10 Rua Carlos Tê
 
 Next to the old soccer field a small plot. It is possible to spend the night here since it is prohibited on the coast. You can spend the day on the coast and come here to sleep. Very calm. Without noise. 5 min from the center where you can eat and buy crafts. No services
 
@@ -1003,8 +1102,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/187368
-18333,"Camping Costa Vizir
+★",,,,,,,,,,https://park4night.com/en/place/187368,
+18333.0,"Camping Costa Vizir
 
 Camping Costa Vizir, pitches or areas with/without trees are available for campervans / mobile homes. No beach view, but 5 minutes walk to the nearest beach or the center. Everything modernized and newly equipped 
 
@@ -1015,9 +1114,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/18333
-N/A,ADVERTISING,https://park4night.com#
-483321,"Garvão - 10 Rua Doutor Manuel Louçao Martins
+★",,,,,,,,,,https://park4night.com/en/place/18333,
+483321.0,"Garvão - 10 Rua Doutor Manuel Louçao Martins
 
 In the village of Garvao there is a playground and park with lots of shade, very quiet. Cafe nearby.
 
@@ -1027,8 +1125,8 @@ Photos
 Comments
 3
 Rating
-★",https://park4night.com/en/place/483321
-322957,"Casas Velhas -
+★",,,,,,,,,,https://park4night.com/en/place/483321,
+322957.0,"Casas Velhas -
 
 Quiet, natural pitch on dam. The right place to enjoy nature, listen to the birds and admire the spectacular starry sky.
 
@@ -1038,9 +1136,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/322957
-N/A,ADVERTISING,https://park4night.com#
-401244,"Baixo Alentejo - M503
+★",,,,,,,,,,https://park4night.com/en/place/322957,
+401244.0,"Baixo Alentejo - M503
 
 Quiet spacious parking lot at bridge. request not to put a toilet or leave rubbish. it's clean and nice here. and very quiet. there aren't many places around so let's be sparing with what's there.
 
@@ -1050,8 +1147,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/401244
-418320,"Green Oaks Alentejo
+★",,,,,,,,,,https://park4night.com/en/place/401244,
+418320.0,"Green Oaks Alentejo
 
 We are a family of six and offer quiet accommodation in a cosy valley on our property. You are surrounded by wild nature and have a phenomenal view of the night sky. The pitches have direct access to the bathing area on the lake. A solar shower, a composting toilet and a sink are located at the new, central bathhouse, where you can also find a clay-built barbecue. Running water is freely available on all pitches. At the farm, which is about 500 m away, there are goats  to pet, cats, a dog, sheep, chickens, chicks and a small farm shop. You can arrive with a camper, caravan or tent. Our farm is about 10 minutes from Ourique and the IC1, or 15 minutes from the motorway. Please let us know before you come and we will send you the directions. Inquiries are best made via Whatsapp or Telegram. Families with children and dogs are very welcome. Children and dogs are free of charge. Reduced rates for long-term stays. We are also Workaway / Wwoofing hosts.
 
@@ -1062,9 +1159,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/418320
-N/A,ADVERTISING,https://park4night.com#
-338554,"Funcheira - Rua do Poço Novo 11
+★",,,,,,,,,,https://park4night.com/en/place/418320,
+338554.0,"Funcheira - Rua do Poço Novo 11
 
 Beautiful site in Alentejo with olive trees, hazelnuts, romancer, figes, cypres, loquats, a big ash tree, etc. close to the train station that connects Algarve to Porto. 40km to the beach , 8km to a dam . 3 min walk from public toilets and a restaurant. 15min walk to the nearest village . Please contact before visiting. Always by e-mail or Whatsup.
 
@@ -1074,8 +1170,8 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/338554
-461791,"Odeceixe -
+★",,,,,,,,,,https://park4night.com/en/place/338554,
+461791.0,"Odeceixe -
 
 Quiet little bistro for a beer in the evening and a coffee in the morning
 
@@ -1085,9 +1181,8 @@ Photos
 Comments
 0
 Rating
-★",https://park4night.com/en/place/461791
-N/A,ADVERTISING,https://park4night.com#
-440341,"Adega dos Nascedios
+★",,,,,,,,,,https://park4night.com/en/place/461791,
+440341.0,"Adega dos Nascedios
 
 A place to Park inside the private property surrounded by a winery, vineyards where its possible to walk and explore, next to the owners house. Acess by a good road of a small Village called Fornalhas Novas. Wine Shop inside. A possibility of winetasting plus local products, with visit to the winery 
 
@@ -1097,8 +1192,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/440341
-461743,"Garvão -
+★",,,,,,,,,,https://park4night.com/en/place/440341,
+461743.0,"Garvão -
 
 Nestled in Portugal’s Alentejo countryside, our stopover offers a breathtaking escape surrounded by cork oaks, holm oaks, and native trees. As the sun sets, the sky bursts into vibrant hues, and at night, you’ll be captivated by the vast canopy of stars. Perfect for those seeking the raw beauty of nature, it’s a peaceful retreat filled with birdsong and the gentle sounds of grazing sheep. Though secluded, it’s conveniently close to a local village, with the sea coast just 50 minutes away, the Algarve within an hour, and Lisbon within two hours. Please check for availability beforehand. ☺️
 
@@ -1108,9 +1203,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/461743
-N/A,ADVERTISING,https://park4night.com#
-316095,"Craveiras -
+★",,,,,,,,,,https://park4night.com/en/place/461743,
+316095.0,"Craveiras -
 
 Welcome to Pereiras-Gare! I offer a Park4night spot for one camper  with a beautiful view overlooking the landscape with Cork Oaks and Strawberry trees . Enjoy the solitude surrounded by nature. Out of sight behind a crest you will find my garden and chickens and an old ruin that I am working on. Feel free to bring your dog, mine are very playful. I have a limited water supply for myself, but if you need 20l, just ask. You can also refill water in Santa Clara or Sao Marcos, only 15min drive from Pereiras. These little villages have nice restaurants too. In Pereiras, a 15 minutes walk away, you will encounter two small shops and two cafés. Please give me a call to find out the easiest access to the spot.
 
@@ -1120,8 +1214,8 @@ Photos
 Comments
 5
 Rating
-★",https://park4night.com/en/place/316095
-77687,"Selao - M501
+★",,,,,,,,,,https://park4night.com/en/place/316095,
+77687.0,"Selao - M501
 
 On the parking lot of the chapel which is completely isolated from the village which is at a few hundred meters. Flat tarred ground. At the edge of the road but very little passage and very quiet. Very beautiful view of the valley, sunset on the mountains ... Sheltered from the wind, sun but a little shade on the sides of the chapel.
 
@@ -1131,5 +1225,4 @@ Photos
 Comments
 4
 Rating
-★",https://park4night.com/en/place/77687
-N/A,ADVERTISING,https://park4night.com#
+★",,,,,,,,,,https://park4night.com/en/place/77687,
