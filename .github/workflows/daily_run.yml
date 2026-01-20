@@ -68,10 +68,7 @@ jobs:
           name: pipeline-debug-package
           path: |
             pipeline_execution.log
-            login_success.png
-            login_failure.png
-            debug_*.png
-          retention-days: ${{ github.event.inputs.mode == 'dev' && 1 || 30 }}
+            *.png
 
       - name: Commit and Push (Prod Only)
         if: github.event.inputs.mode != 'dev'
