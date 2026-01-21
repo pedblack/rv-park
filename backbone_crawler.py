@@ -17,19 +17,16 @@ MODEL_NAME = "gemini-2.0-flash-lite"
 PROD_CSV = "backbone_locations.csv"
 DEV_CSV = "backbone_locations_dev.csv"
 LOG_FILE = "pipeline_execution.log"
-CONCURRENCY_LIMIT = 3  # Improvements: Process 3 items at a time
+CONCURRENCY_LIMIT = 3  
 
-# --- ADAPTED SETTINGS ---
 AI_DELAY = 1.0
 STALENESS_DAYS = 30
 MIN_REVIEWS_THRESHOLD = 5
 DEV_LIMIT = 2
 
-# --- PARTITION SETTINGS ---
 URL_LIST_FILE = "url_list.txt"   
 STATE_FILE = "queue_state.json"  
 
-# --- SYSTEM SETTINGS ---
 GEMINI_API_KEY = os.environ.get("GOOGLE_API_KEY")
 P4N_USER = os.environ.get("P4N_USERNAME") 
 P4N_PASS = os.environ.get("P4N_PASSWORD") 
@@ -92,15 +89,13 @@ class P4NScraper:
 
     async def analyze_with_ai(self, raw_data):
         self.stats["gemini_calls"] += 1
-        system_instruction = """Analyze property data and reviews. Return JSON ONLY. Use snake_case.
-        Schema: {num_places: int, parking_min: float, parking_max: float, electricity_eur: float, top_languages: [{lang: str, count: int}], pros_cons: {pros: [], cons: []}}"""
+        system_instruction = """Analyze data. Return JSON ONLY. Schema: {num_places: int, parking_min: float, parking_max: float, electricity_eur: float, top_languages: [{lang: str, count: int}], pros_cons: {pros: [{topic: str, count: int}], cons: [{topic: str, count: int}]}}"""
         
         json_payload = json.dumps(raw_data, default=str, ensure_ascii=False)
         config = types.GenerateContentConfig(response_mime_type="application/json", temperature=0.1, system_instruction=system_instruction)
         try:
             await asyncio.sleep(AI_DELAY) 
             response = await client.aio.models.generate_content(model=MODEL_NAME, contents=f"ANALYZE:\n{json_payload}", config=config)
-            # Cleanup Markdown if Gemini includes it despite requested mime_type
             clean_text = re.sub(r'```json\s*|\s*```', '', response.text).strip()
             return json.loads(clean_text)
         except:
@@ -126,7 +121,6 @@ class P4NScraper:
                 p_id = await page.locator("body").get_attribute("data-place-id") or url.split("/")[-1]
                 title = (await page.locator("h1").first.inner_text()).split('\n')[0].strip()
 
-                # Robust Coordinate Extraction
                 lat, lng = 0.0, 0.0
                 coord_link_el = page.locator("a[href*='lat='][href*='lng=']").first
                 coord_link = await coord_link_el.get_attribute("href") if await coord_link_el.count() > 0 else None
@@ -134,18 +128,15 @@ class P4NScraper:
                     m = re.search(r'lat=([-+]?\d*\.\d+|\d+)&lng=([-+]?\d*\.\d+|\d+)', coord_link)
                     if m: lat, lng = float(m.group(1)), float(m.group(2))
 
-                # Review Extraction
                 review_articles = await page.locator(".place-feedback-article").all()
                 formatted_reviews = []
                 review_seasonality = {}
 
                 for article in review_articles[:15]:
                     try:
-                        # Updated Selector for Date based on DOM
                         date_text = await article.locator("span.caption.text-gray").inner_text()
                         text_val = await article.locator(".place-feedback-article-content").inner_text()
                         
-                        # Normalize DD/MM/YYYY to YYYY-MM
                         date_parts = date_text.strip().split('/')
                         if len(date_parts) == 3:
                             month_key = f"{date_parts[2]}-{date_parts[1]}"
@@ -156,15 +147,9 @@ class P4NScraper:
                         formatted_reviews.append(f"[{date_val}]: {text_val.strip()}")
                     except: continue
 
-                raw_payload = {
-                    "places_count": await self._get_dl(page, "Number of places"),
-                    "parking_cost": await self._get_dl(page, "Parking cost"),
-                    "all_reviews": formatted_reviews 
-                }
+                ai_data = await self.analyze_with_ai({"places_count": await self._get_dl(page, "Number of places"), "parking_cost": await self._get_dl(page, "Parking cost"), "all_reviews": formatted_reviews})
                 
-                ai_data = await self.analyze_with_ai(raw_payload)
-                
-                # Defensively parse the AI response to avoid string indexing errors
+                # BUG FIX: Defensive parsing for top_languages and pros_cons
                 top_langs = ai_data.get("top_languages", [])
                 pros_cons = ai_data.get("pros_cons") or {}
                 
@@ -206,8 +191,6 @@ class P4NScraper:
             await Stealth().apply_stealth_async(page)
             
             target_urls, current_idx, total_idx = DailyQueueManager.get_next_partition()
-            ts_print(f"📅 [PARTITION] Day {current_idx} of {total_idx}")
-            
             discovery_links = []
             for url in target_urls:
                 await page.goto(url, wait_until="domcontentloaded")
@@ -218,16 +201,14 @@ class P4NScraper:
                     href = await link.get_attribute("href")
                     if href: discovery_links.append(f"https://park4night.com{href}" if href.startswith("/") else href)
 
-            discovered = list(set(discovery_links))
             queue = []
-            for link in discovered:
+            for link in list(set(discovery_links)):
                 p_id = link.split("/")[-1]
                 is_stale = True
                 if not self.force and not self.existing_df.empty and str(p_id) in self.existing_df['p4n_id'].astype(str).values:
                     last_date = self.existing_df[self.existing_df['p4n_id'].astype(str) == str(p_id)]['last_scraped'].iloc[0]
                     if pd.notnull(last_date) and (datetime.now() - pd.to_datetime(last_date)) < timedelta(days=STALENESS_DAYS):
                         is_stale = False
-                
                 if is_stale or self.force:
                     if self.is_dev and len(queue) >= DEV_LIMIT: break
                     queue.append(link)
@@ -235,10 +216,8 @@ class P4NScraper:
 
             tasks = [self.extract_atomic(context, link, i, len(queue)) for i, link in enumerate(queue, 1)]
             await asyncio.gather(*tasks)
-            
             await browser.close()
             self._upsert_and_save()
-            ts_print(f"🏁 [RUN SUMMARY] Scraped: {self.stats['read']} | Gemini: {self.stats['gemini_calls']}")
             if not self.is_dev: DailyQueueManager.increment_state()
 
     def _upsert_and_save(self):
