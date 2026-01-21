@@ -13,7 +13,7 @@ from playwright.async_api import async_playwright
 from playwright_stealth import Stealth
 
 # --- CONFIGURABLE CONSTANTS ---
-MODEL_NAME = "gemini-2.0-flash-lite" 
+MODEL_NAME = "gemini-2.5-flash-lite" 
 PROD_CSV = "backbone_locations.csv"
 DEV_CSV = "backbone_locations_dev.csv"
 LOG_FILE = "pipeline_execution.log"
@@ -48,7 +48,6 @@ class PipelineLogger:
             else: processed_content[k] = v
         
         log_entry = {"timestamp": datetime.now().isoformat(), "type": event_type, "content": processed_content}
-        
         mode = "w" if not PipelineLogger._initialized else "a"
         if not PipelineLogger._initialized: PipelineLogger._initialized = True
 
@@ -112,10 +111,39 @@ class P4NScraper:
         self.stats["gemini_calls"] += 1
         PipelineLogger.log_event("SENT_TO_GEMINI", raw_data)
         
-        system_instruction = """Analyze data. Return JSON ONLY. Schema: {num_places: int, parking_min: float, parking_max: float, electricity_eur: float, top_languages: [{lang: str, count: int}], pros_cons: {pros: [{topic: str, count: int}], cons: [{topic: str, count: int}]}}"""
+        # ENHANCED STRATEGIC PROMPT
+        system_instruction = """Analyze the provided property data and reviews. You MUST identify recurring themes and count their occurrences across all reviews. Return JSON ONLY. Use snake_case.
+
+        Schema:
+        {
+          "num_places": int,
+          "parking_min": float,
+          "parking_max": float,
+          "electricity_eur": float,
+          "top_languages": [ {"lang": "string", "count": int} ],
+          "pros_cons": {
+            "pros": [ {"topic": "string", "count": int} ],
+            "cons": [ {"topic": "string", "count": int} ]
+          }
+        }
+
+        Instructions:
+        1. num_places: Extract from the 'places_count' field.
+        2. Pricing: Extract min/max range. If only one price exists, set both. If included in parking, set electricity_eur to 0.0.
+        3. Languages: Detect review languages and provide frequency counts.
+        4. Themes: Extract pro/con themes (3-5 words max). You MUST provide a count for each theme.
+        5. Priorities: For 'cons', highlight overcrowding, police/fines, or lack of services to help calculate the Frustration Index.
+        6. Missing Data: Use null for missing numeric data. Do not hallucinate counts.
+
+        Example Theme Format: {"topic": "quiet at night", "count": 5}"""
         
         json_payload = json.dumps(raw_data, default=str, ensure_ascii=False)
-        config = types.GenerateContentConfig(response_mime_type="application/json", temperature=0.1, system_instruction=system_instruction)
+        # Added response_mime_type for strict JSON enforcement
+        config = types.GenerateContentConfig(
+            response_mime_type="application/json", 
+            temperature=0.1, 
+            system_instruction=system_instruction
+        )
         try:
             await asyncio.sleep(AI_DELAY) 
             response = await client.aio.models.generate_content(model=MODEL_NAME, contents=f"ANALYZE:\n{json_payload}", config=config)
@@ -157,16 +185,14 @@ class P4NScraper:
                     m = re.search(r'lat=([-+]?\d*\.\d+|\d+)&lng=([-+]?\d*\.\d+|\d+)', coord_link)
                     if m: lat, lng = float(m.group(1)), float(m.group(2))
 
-                # Logic Change: Fetch ALL reviews found in DOM
+                # Fetch ALL reviews using text_content to capture hidden ones
                 review_articles = await page.locator(".place-feedback-article").all()
                 formatted_reviews, review_seasonality = [], {}
 
-                for article in review_articles: # Removed [:15] limit
+                for article in review_articles:
                     try:
-                        # Logic Change: Using .text_content() to capture hidden 'd-none' reviews
                         date_text = await article.locator("span.caption.text-gray").text_content()
                         text_val = await article.locator(".place-feedback-article-content").text_content()
-                        
                         date_parts = date_text.strip().split('/')
                         if len(date_parts) == 3:
                             month_key = f"{date_parts[2]}-{date_parts[1]}"
@@ -240,7 +266,7 @@ class P4NScraper:
             discovered = list(set(discovery_links))
             
             if self.is_dev:
-                ts_print(f"🛠️  [DEV MODE] Seeking {DEV_LIMIT} successful processing run(s)...")
+                ts_print(f"🛠️  [DEV MODE] Seeking {DEV_LIMIT} successful run(s)...")
                 
             tasks = []
             for link in discovered:
@@ -261,7 +287,7 @@ class P4NScraper:
                     else:
                         tasks.append(self.extract_atomic(context, link, len(tasks) + 1, len(discovered)))
                 else: 
-                    ts_print(f"⏩  [SKIP] Listing already fresh: {link}")
+                    ts_print(f"⏩  [SKIP] Listing fresh: {link}")
                     self.stats["discarded_fresh"] += 1
 
             if tasks:
