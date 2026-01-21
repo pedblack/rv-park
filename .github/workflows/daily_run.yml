@@ -12,7 +12,7 @@ on:
         type: choice
         options: [prod, dev]
       skip_crawl:
-        description: 'Skip crawling and only run visualization'
+        description: 'Skip crawling and only run analysis/visualization'
         required: false
         type: boolean
         default: false
@@ -40,6 +40,8 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install -r requirements.txt
+          # Ensure scikit-learn is installed for the analyzer
+          pip install scikit-learn 
           playwright install chromium --with-deps
 
       - name: Run Unified Scraper
@@ -49,12 +51,17 @@ jobs:
           P4N_USERNAME: ${{ secrets.P4N_USERNAME }}
           P4N_PASSWORD: ${{ secrets.P4N_PASSWORD }}
         run: |
-          # Build arguments dynamically
           ARGS=""
           if [[ "${{ github.event.inputs.mode }}" == "dev" ]]; then ARGS="$ARGS --dev"; fi
           if [[ "${{ github.event.inputs.force_recrawl }}" == "true" ]]; then ARGS="$ARGS --force"; fi
-          
           python backbone_crawler.py $ARGS
+
+      - name: Run Demand Analyzer
+        # The analyzer transforms raw data into strategic intelligence
+        # FIRE Metric: Targets 90+ Opportunity Score clusters
+        run: |
+          if [ -f "backbone_locations_dev.csv" ]; then export INPUT_CSV="backbone_locations_dev.csv"; fi
+          python demand_analyzer.py
 
       - name: Generate Visualization
         run: |
@@ -68,6 +75,7 @@ jobs:
           name: pipeline-debug-package
           path: |
             pipeline_execution.log
+            strategic_analysis.json
             *.png
 
       - name: Commit and Push (Prod Only)
@@ -75,6 +83,6 @@ jobs:
         run: |
           git config --global user.name "P4N Bot"
           git config --global user.email "bot@github.com"
-          # Tracking index.html for pedblack.github.io/my-land-engine-test/
-          git add backbone_locations.csv index.html queue_state.json pipeline_execution.log
-          git diff --staged --quiet || (git commit -m "Auto-update data [skip ci]" && git push)
+          # Track the strategic JSON to monitor check-in frequency over time
+          git add backbone_locations.csv index.html queue_state.json pipeline_execution.log strategic_analysis.json
+          git diff --staged --quiet || (git commit -m "Auto-update strategic intelligence [skip ci]" && git push)
