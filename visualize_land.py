@@ -4,6 +4,7 @@ import os
 import json
 import numpy as np
 
+# Use environment variables to support both prod and dev modes
 CSV_FILE = os.environ.get("CSV_FILE", "backbone_locations.csv")
 STRATEGIC_FILE = "strategic_analysis.json"
 
@@ -12,7 +13,7 @@ def generate_map():
         print(f"❌ {CSV_FILE} not found.")
         return
 
-    # 1. Load Strategic Intelligence
+    # 1. Load Strategic Intelligence (Universal Score Map)
     score_map = {}
     recommendation = None
     if os.path.exists(STRATEGIC_FILE):
@@ -20,10 +21,8 @@ def generate_map():
             with open(STRATEGIC_FILE, 'r') as f:
                 strategy = json.load(f)
                 recommendation = strategy.get("strategic_recommendation")
-                # Map p4n_ids to their cluster's opportunity score
-                for cluster in strategy.get("clusters", []):
-                    for p_id in cluster.get("top_performing_p4n_ids", []):
-                        score_map[str(p_id)] = cluster.get("opportunity_score", 0)
+                # Fix: Using the full mapping so every marker gets a score
+                score_map = strategy.get("full_score_map", {})
         except Exception as e:
             print(f"⚠️ Could not load strategy JSON: {e}")
 
@@ -35,7 +34,7 @@ def generate_map():
         print("⚠️ No valid data found.")
         return
 
-    # Initialize Map (Centered on Alentejo/Algarve)
+    # Initialize Map centered on Alentejo/Algarve
     m = folium.Map(location=[38.0, -8.5], zoom_start=8, tiles="cartodbpositron")
     
     marker_layer = folium.FeatureGroup(name="MainPropertyLayer")
@@ -65,26 +64,25 @@ def generate_map():
         
         parking_display = f"{p_min} - {p_max}" if p_min != p_max else p_min
 
-        # Parse Seasonality
+        # Parse Seasonality for Winter Stability
         seasonality_text = "No data"
         stability_ratio = 0.0
         try:
             if pd.notna(row.get('review_seasonality')):
                 s_dict = json.loads(row['review_seasonality'])
-                seasonality_text = ", ".join([f"{k}: {v}" for k, v in sorted(s_dict.items())[-2:]])
-                # Simple check for winter stability (Nov-Feb)
+                sorted_keys = sorted(s_dict.keys())
+                seasonality_text = ", ".join([f"{k}: {s_dict[k]}" for k in sorted_keys[-2:]])
                 winter_count = sum(v for k, v in s_dict.items() if any(m in k for m in ["-11", "-12", "-01", "-02"]))
                 stability_ratio = 1.0 if winter_count > 0 else 0.0
         except: pass
         
-        # --- FIRE Intelligence Scoring ---
+        # Scoring Logic
         opp_score = score_map.get(str(row['p4n_id']), 0)
         
-        # Color Logic: CadetBlue = Gold Zone (90+), Green = Strong, Orange = Neutral
         if opp_score >= 85:
             marker_color = 'cadetblue'
             icon_type = 'star'
-        elif row['avg_rating'] >= 4.2 and stability_ratio > 0:
+        elif opp_score >= 60:
             marker_color = 'green'
             icon_type = 'thumbs-up'
         else:
@@ -122,6 +120,7 @@ def generate_map():
             icon=folium.Icon(color=marker_color, icon=icon_type, prefix='fa')
         )
         
+        # Extra data required for JavaScript filtering
         marker.options['extraData'] = {
             'rating': float(row['avg_rating']),
             'places': num_places,
@@ -130,18 +129,15 @@ def generate_map():
         }
         marker.add_to(marker_layer)
 
-    # --- STRATEGIC INTELLIGENCE OVERLAY ---
+    # --- STRATEGIC memo and INTERACTIVE FILTERS ---
     strat_box = f"""
     <div id="strat-panel" class="map-overlay" style="bottom: 20px; left: 20px; width: 280px; border-left: 5px solid #f1c40f;">
         <h4 style="margin:0; color: #2c3e50;">🔥 FIRE Investment Memo</h4>
         <hr style="margin: 10px 0;">
         <div style="font-size: 12px;">
-            <b>Target Region:</b> {recommendation['target_region'] if recommendation else 'Running Analysis...'}<br>
+            <b>Target Region:</b> {recommendation['target_region'] if recommendation else 'Awaiting Analysis...'}<br>
             <b>Max Opportunity:</b> <span style="color: #27ae60; font-weight: bold;">{recommendation['opportunity_score'] if recommendation else 'N/A'} pts</span><br>
-            <p style="margin-top: 8px; font-style: italic;">"{recommendation['market_gap'] if recommendation else 'Awaiting data...'}"</p>
-        </div>
-        <div style="font-size: 10px; color: #7f8c8d; margin-top: 5px;">
-            <b>Mandate:</b> Target high-WTP clusters (DE/NL) in 'Service Deserts'.
+            <p style="margin-top: 8px; font-style: italic;">"{recommendation['market_gap'] if recommendation else 'Recalculating...'}"</p>
         </div>
     </div>
     """
@@ -150,12 +146,10 @@ def generate_map():
     <style>
         .map-overlay {{ font-family: sans-serif; background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); position: fixed; z-index: 9999; }}
         #filter-panel {{ top: 20px; right: 20px; width: 220px; }}
-        #debug-log {{ top: 20px; left: 60px; font-size: 10px; background: rgba(255,255,255,0.8); padding: 5px; border-radius: 4px; border: 1px solid #ccc; }}
         .btn-apply {{ background: #2c3e50; color: white; width: 100%; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; border: none; margin-top: 10px; }}
         .btn-reset {{ background: #95a5a6; color: white; width: 100%; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; border: none; margin-top: 5px; }}
     </style>
 
-    <div id="debug-log" class="map-overlay">Status: Ready</div>
     {strat_box}
 
     <div id="filter-panel" class="map-overlay">
@@ -211,7 +205,7 @@ def generate_map():
     """
     m.get_root().html.add_child(folium.Element(filter_html))
     m.save("index.html")
-    print(f"🚀 Map generated. Intelligence Panel active.")
+    print(f"🚀 Map generated with full interactivity and strategic mapping.")
 
 if __name__ == "__main__":
     generate_map()
