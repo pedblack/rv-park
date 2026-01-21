@@ -100,7 +100,9 @@ class P4NScraper:
         try:
             await asyncio.sleep(AI_DELAY) 
             response = await client.aio.models.generate_content(model=MODEL_NAME, contents=f"ANALYZE:\n{json_payload}", config=config)
-            return json.loads(response.text)
+            # Cleanup Markdown if Gemini includes it despite requested mime_type
+            clean_text = re.sub(r'```json\s*|\s*```', '', response.text).strip()
+            return json.loads(clean_text)
         except:
             return {}
 
@@ -132,14 +134,14 @@ class P4NScraper:
                     m = re.search(r'lat=([-+]?\d*\.\d+|\d+)&lng=([-+]?\d*\.\d+|\d+)', coord_link)
                     if m: lat, lng = float(m.group(1)), float(m.group(2))
 
-                # Review Extraction Fixes
+                # Review Extraction
                 review_articles = await page.locator(".place-feedback-article").all()
                 formatted_reviews = []
                 review_seasonality = {}
 
                 for article in review_articles[:15]:
                     try:
-                        # Fixed Selector for Date
+                        # Updated Selector for Date based on DOM
                         date_text = await article.locator("span.caption.text-gray").inner_text()
                         text_val = await article.locator(".place-feedback-article-content").inner_text()
                         
@@ -161,6 +163,11 @@ class P4NScraper:
                 }
                 
                 ai_data = await self.analyze_with_ai(raw_payload)
+                
+                # Defensively parse the AI response to avoid string indexing errors
+                top_langs = ai_data.get("top_languages", [])
+                pros_cons = ai_data.get("pros_cons") or {}
+                
                 row = {
                     "p4n_id": p_id, "title": title, "url": url, "latitude": lat, "longitude": lng,
                     "location_type": await self._get_type(page),
@@ -171,9 +178,9 @@ class P4NScraper:
                     "parking_max_eur": ai_data.get("parking_max"),
                     "electricity_eur": ai_data.get("electricity_eur"),
                     "review_seasonality": json.dumps(review_seasonality),
-                    "top_languages": "; ".join([f"{l['lang']} ({l['count']})" for l in ai_data.get("top_languages", [])]),
-                    "ai_pros": "; ".join([f"{p['topic']} ({p['count']})" for p in ai_data.get('pros_cons', {}).get('pros', [])]),
-                    "ai_cons": "; ".join([f"{c['topic']} ({c['count']})" for c in ai_data.get('pros_cons', {}).get('cons', [])]),
+                    "top_languages": "; ".join([f"{l.get('lang')} ({l.get('count')})" for l in top_langs if isinstance(l, dict)]),
+                    "ai_pros": "; ".join([f"{p.get('topic')} ({p.get('count')})" for p in pros_cons.get('pros', []) if isinstance(p, dict)]),
+                    "ai_cons": "; ".join([f"{c.get('topic')} ({c.get('count')})" for c in pros_cons.get('cons', []) if isinstance(c, dict)]),
                     "last_scraped": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 }
                 self.processed_batch.append(row)
