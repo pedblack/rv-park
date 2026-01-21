@@ -5,18 +5,19 @@ import os
 from datetime import datetime, timedelta
 from sklearn.cluster import DBSCAN
 
-# --- BUG FIX: DYNAMIC CONFIGURATION ---
+# --- DYNAMIC CONFIGURATION ---
 INPUT_CSV = os.environ.get("INPUT_CSV", "backbone_locations.csv")
 OUTPUT_JSON = "strategic_analysis.json"
 STALENESS_DAYS = 30
 EARTH_RADIUS_KM = 6371.0
-CLUSTER_RADIUS_KM = 15.0  # Improved: Real km distance
+CLUSTER_RADIUS_KM = 15.0  # Proper km distance
 
 FRUSTRATION_KEYWORDS = ["full", "crowded", "dirty", "no space", "loud", "police", "fines", "busy"]
 HIGH_WTP_LANGUAGES = ["German", "Dutch", "English"]
 
 def load_and_filter_data():
-    if not os.path.exists(INPUT_CSV): return None
+    if not os.path.exists(INPUT_CSV):
+        return None
     df = pd.read_csv(INPUT_CSV)
     df['last_scraped'] = pd.to_datetime(df['last_scraped'])
     freshness_threshold = datetime.now() - timedelta(days=STALENESS_DAYS)
@@ -38,7 +39,7 @@ def run_analysis():
     df['stability_score'] = df['review_seasonality'].apply(calculate_seasonality_stability)
     df['frustration_score'] = df['ai_cons'].apply(lambda x: min(1.0, sum(1 for w in FRUSTRATION_KEYWORDS if w in str(x).lower()) / 3.0))
 
-    # Improved Clustering using Haversine
+    # DBSCAN using Haversine (Radians)
     coords = np.radians(df[['latitude', 'longitude']].values)
     epsilon = CLUSTER_RADIUS_KM / EARTH_RADIUS_KM
     db = DBSCAN(eps=epsilon, min_samples=1, metric='haversine').fit(coords)
@@ -56,7 +57,6 @@ def run_analysis():
         season = c_df['stability_score'].mean() * 20
         total_score = round(demand + gap + wtp + season, 2)
 
-        # Map scores to every property in this cluster
         for p_id in c_df['p4n_id']:
             full_score_map[str(p_id)] = total_score
 
@@ -72,15 +72,17 @@ def run_analysis():
         "strategic_recommendation": {
             "target_region": clusters[0]['cluster_name'],
             "opportunity_score": clusters[0]['opportunity_score'],
-            "market_gap": "High frustration index cluster."
+            "market_gap": "High frustration index identified in cluster."
         },
         "full_score_map": full_score_map,
         "clusters": clusters[:5]
     }
 
     with open(OUTPUT_JSON, 'w') as f:
-        json.dump(result, indent=4, f)
-    print(f"✅ Analysis Complete. Map Data Saved.")
+        # FIX: Swapped positional argument 'f' with keyword argument 'indent'
+        json.dump(result, f, indent=4)
+    
+    print(f"✅ Strategic Analysis complete. Top Opportunity: {clusters[0]['opportunity_score']} in {clusters[0]['cluster_name']}")
 
 if __name__ == "__main__":
     run_analysis()
