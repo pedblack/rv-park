@@ -254,7 +254,11 @@ class P4NScraper:
             await Stealth().apply_stealth_async(page)
             
             target_urls, current_idx, total_idx = DailyQueueManager.get_next_partition()
+
+            ts_print("="*60)
+            ts_print(f"🔍 [SEARCH PAGE] Scraping: {target_urls[0] if target_urls else 'N/A'}")
             ts_print(f"📅 [PARTITION] Day {current_idx} of {total_idx}")
+            ts_print("="*60)
             
             discovery_links = []
             for url in target_urls:
