@@ -166,6 +166,9 @@ class P4NScraper:
                 await page.goto(url, wait_until="domcontentloaded", timeout=30000)
                 await page.wait_for_selector(".place-feedback-average", timeout=10000)
 
+                # Wait for DOM rendering
+                await asyncio.sleep(5.0)
+
                 stats_container = page.locator(".place-feedback-average")
                 raw_count_text = await stats_container.locator("strong").text_content()
                 actual_feedback_count = int(re.search(r'(\d+)', raw_count_text).group(1))
