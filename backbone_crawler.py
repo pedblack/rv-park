@@ -17,7 +17,6 @@ MODEL_NAME = "gemini-2.0-flash-lite"
 PROD_CSV = "backbone_locations.csv"
 DEV_CSV = "backbone_locations_dev.csv"
 LOG_FILE = "pipeline_execution.log"
-# Safe for Tier 1 (300 RPM): 3 simultaneous tasks + 1s delay
 CONCURRENCY_LIMIT = 3  
 
 AI_DELAY = 1.0
@@ -130,7 +129,6 @@ class P4NScraper:
 
     async def extract_atomic(self, context, url, current_num, total_num):
         async with self.semaphore:
-            # Check if limit reached in dev mode during concurrent execution
             if self.is_dev and self.stats["read"] >= DEV_LIMIT:
                 return
 
@@ -141,7 +139,7 @@ class P4NScraper:
                 await page.wait_for_selector(".place-feedback-average", timeout=10000)
 
                 stats_container = page.locator(".place-feedback-average")
-                raw_count_text = await stats_container.locator("strong").inner_text()
+                raw_count_text = await stats_container.locator("strong").text_content()
                 actual_feedback_count = int(re.search(r'(\d+)', raw_count_text).group(1))
                 
                 if actual_feedback_count < MIN_REVIEWS_THRESHOLD:
@@ -150,7 +148,7 @@ class P4NScraper:
                     return
 
                 p_id = await page.locator("body").get_attribute("data-place-id") or url.split("/")[-1]
-                title = (await page.locator("h1").first.inner_text()).split('\n')[0].strip()
+                title = (await page.locator("h1").first.text_content()).split('\n')[0].strip()
 
                 lat, lng = 0.0, 0.0
                 coord_link_el = page.locator("a[href*='lat='][href*='lng=']").first
@@ -159,14 +157,15 @@ class P4NScraper:
                     m = re.search(r'lat=([-+]?\d*\.\d+|\d+)&lng=([-+]?\d*\.\d+|\d+)', coord_link)
                     if m: lat, lng = float(m.group(1)), float(m.group(2))
 
+                # Logic Change: Fetch ALL reviews found in DOM
                 review_articles = await page.locator(".place-feedback-article").all()
                 formatted_reviews, review_seasonality = [], {}
 
-                for article in review_articles[:15]:
+                for article in review_articles: # Removed [:15] limit
                     try:
-                        # Fixed Selector for Date
-                        date_text = await article.locator("span.caption.text-gray").inner_text()
-                        text_val = await article.locator(".place-feedback-article-content").inner_text()
+                        # Logic Change: Using .text_content() to capture hidden 'd-none' reviews
+                        date_text = await article.locator("span.caption.text-gray").text_content()
+                        text_val = await article.locator(".place-feedback-article-content").text_content()
                         
                         date_parts = date_text.strip().split('/')
                         if len(date_parts) == 3:
@@ -192,7 +191,7 @@ class P4NScraper:
                     "location_type": await self._get_type(page),
                     "num_places": ai_data.get("num_places"),
                     "total_reviews": actual_feedback_count, 
-                    "avg_rating": float(re.search(r'(\d+\.?\d*)', await stats_container.locator(".text-gray").inner_text()).group(1)),
+                    "avg_rating": float(re.search(r'(\d+\.?\d*)', await stats_container.locator(".text-gray").text_content()).group(1)),
                     "parking_min_eur": ai_data.get("parking_min"),
                     "parking_max_eur": ai_data.get("parking_max"),
                     "electricity_eur": ai_data.get("electricity_eur"),
@@ -215,7 +214,7 @@ class P4NScraper:
         except: return "Unknown"
 
     async def _get_dl(self, page, label):
-        try: return (await page.locator(f"dt:has-text('{label}') + dd").first.inner_text()).strip()
+        try: return (await page.locator(f"dt:has-text('{label}') + dd").first.text_content()).strip()
         except: return "N/A"
 
     async def start(self):
@@ -241,7 +240,7 @@ class P4NScraper:
             discovered = list(set(discovery_links))
             
             if self.is_dev:
-                ts_print(f"🛠️  [DEV MODE] Seeking {DEV_LIMIT} successful run(s)...")
+                ts_print(f"🛠️  [DEV MODE] Seeking {DEV_LIMIT} successful processing run(s)...")
                 
             tasks = []
             for link in discovered:
@@ -256,7 +255,6 @@ class P4NScraper:
                         is_stale = False
                 
                 if is_stale or self.force:
-                    # In dev mode, we process sequentially until successful count reached
                     if self.is_dev:
                         await self.extract_atomic(context, link, self.stats["read"] + 1, "Seeking...")
                         if self.stats["read"] >= DEV_LIMIT: break
