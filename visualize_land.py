@@ -3,6 +3,7 @@ import folium
 import os
 import json
 
+# --- DYNAMIC CONFIGURATION ---
 CSV_FILE = os.environ.get("CSV_FILE", "backbone_locations.csv")
 STRATEGIC_FILE = "strategic_analysis.json"
 
@@ -11,7 +12,7 @@ def generate_map():
         print(f"❌ {CSV_FILE} not found.")
         return
 
-    # Load Strategic Intelligence
+    # 1. Load Strategic Intelligence
     score_map = {}
     recommendation = None
     if os.path.exists(STRATEGIC_FILE):
@@ -23,10 +24,18 @@ def generate_map():
         except Exception as e:
             print(f"⚠️ Could not load strategy JSON: {e}")
 
+    # 2. Load and Clean Data
     df = pd.read_csv(CSV_FILE)
+    
+    # DEFENSIVE FIX: Ensure numeric columns are clean to prevent int(NaN) crashes
+    df['latitude'] = pd.to_numeric(df['latitude'], errors='coerce').fillna(0)
+    df['longitude'] = pd.to_numeric(df['longitude'], errors='coerce').fillna(0)
+    df['avg_rating'] = pd.to_numeric(df['avg_rating'], errors='coerce').fillna(0)
+    df['num_places'] = pd.to_numeric(df['num_places'], errors='coerce').fillna(0).astype(int)
+
     df_clean = df[(df['latitude'] != 0) & (df['longitude'] != 0)].dropna(subset=['latitude', 'longitude'])
 
-    # Initialize Map
+    # 3. Initialize Map
     m = folium.Map(location=[38.0, -8.5], zoom_start=8, tiles="cartodbpositron")
     
     # REQUIREMENT: Add Chart.js for the histogram
@@ -45,10 +54,10 @@ def generate_map():
             icon=folium.Icon(color='green' if opp_score >= 60 else 'orange', icon='home', prefix='fa')
         )
         
-        # DATA EMBEDDING: Store raw data fields for JS to aggregate
+        # DATA EMBEDDING: Store cleaned numeric data for JS to aggregate
         marker.options['extraData'] = {
             'rating': float(row['avg_rating']),
-            'places': int(row.get('num_places', 0) or 0),
+            'places': int(row['num_places']),
             'type': str(row['location_type']),
             'seasonality': row['review_seasonality'] if pd.notna(row['review_seasonality']) else "{}",
             'pros': row['ai_pros'] if pd.notna(row['ai_pros']) else "",
@@ -56,7 +65,7 @@ def generate_map():
         }
         marker.add_to(marker_layer)
 
-    # UI AND AGGREGATION LOGIC
+    # 4. UI AND AGGREGATION LOGIC
     dashboard_html = f"""
     <style>
         .map-overlay {{ font-family: sans-serif; background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); position: fixed; z-index: 9999; overflow-y: auto; }}
@@ -94,7 +103,6 @@ def generate_map():
     function parseThemeString(str) {{
         const results = {{}};
         if (!str) return results;
-        // Matches "Theme Name (Count)"
         str.split(';').forEach(item => {{
             const match = item.match(/(.+)\\s\\((\\d+)\\)/);
             if (match) {{
@@ -112,23 +120,20 @@ def generate_map():
         activeMarkers.forEach(m => {{
             const d = m.options.extraData;
             
-            // 1. Seasonality Aggregation
             try {{
                 const s = JSON.parse(d.seasonality);
                 for (let date in s) {{
-                    const month = date.split('-')[1]; // Aggregate by month (01-12)
+                    const month = date.split('-')[1];
                     globalSeason[month] = (globalSeason[month] || 0) + s[date];
                 }}
             }} catch(e) {{}}
 
-            // 2. Pros/Cons Aggregation
             const p = parseThemeString(d.pros);
             for (let k in p) {{ globalPros[k] = (globalPros[k] || 0) + p[k]; }}
             const c = parseThemeString(d.cons);
             for (let k in c) {{ globalCons[k] = (globalCons[k] || 0) + c[k]; }}
         }});
 
-        // Render Histogram
         const labels = ["01","02","03","04","05","06","07","08","09","10","11","12"];
         const ctx = document.getElementById('seasonChart').getContext('2d');
         if (chartInstance) chartInstance.destroy();
@@ -141,7 +146,6 @@ def generate_map():
             options: {{ plugins: {{ legend: {{ display: false }} }}, scales: {{ y: {{ beginAtZero: true }} }} }}
         }});
 
-        // Render Top 10 Lists
         const renderTop10 = (data, divId) => {{
             const sorted = Object.entries(data).sort((a,b) => b[1]-a[1]).slice(0, 10);
             document.getElementById(divId).innerHTML = sorted.map(i => 
@@ -167,9 +171,7 @@ def generate_map():
         }});
 
         filtered.forEach(m => targetLayer.addLayer(m));
-        document.getElementById('match-count').innerText = filtered.length;
         
-        // TRIGGER RECALCULATION
         updateDashboard(filtered);
     }}
     
@@ -183,3 +185,7 @@ def generate_map():
     """
     m.get_root().html.add_child(folium.Element(dashboard_html))
     m.save("index.html")
+    print("✅ index.html generated successfully.")
+
+if __name__ == "__main__":
+    generate_map()
