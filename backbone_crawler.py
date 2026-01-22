@@ -196,7 +196,6 @@ class P4NScraper:
 
         Example Theme Format: {"topic": "quiet at night", "count": 5}"""
 
-        # Added response_mime_type for strict JSON enforcement
         config = types.GenerateContentConfig(
             response_mime_type="application/json",
             temperature=0.1,
@@ -219,7 +218,7 @@ class P4NScraper:
             except Exception as e:
                 # If it's a 503/Overloaded error and we have retries left, continue the loop
                 if "503" in str(e) or "overloaded" in str(e).lower():
-                    if attempt < MAX_RETRIES - 1:
+                    if attempt < MAX_GEMINI_RETRIES - 1:
                         ts_print(f"🔄 [RETRY] Attempt {attempt+1} failed for {url}. Retrying...")
                         continue
                 
@@ -266,9 +265,10 @@ class P4NScraper:
 
                 stats_container = page.locator(".place-feedback-average")
                 raw_count_text = await stats_container.locator("strong").text_content()
-                actual_feedback_count = int(
-                    re.search(r"(\d+)", raw_count_text).group(1)
-                )
+                
+                # DEFENSIVE FIX: Extract review count safely to avoid NoneType error
+                count_match = re.search(r"(\d+)", raw_count_text)
+                actual_feedback_count = int(count_match.group(1)) if count_match else 0
 
                 if actual_feedback_count < MIN_REVIEWS_THRESHOLD:
                     ts_print(
