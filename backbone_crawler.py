@@ -396,7 +396,7 @@ class P4NScraper:
                 self.processed_batch.append(row)
                 self.stats["read"] += 1
             except Exception as e:
-                ts_print(f"⚠️ Error for {url}: {e}")
+                ts_print(f"⚠️ Error for {url} - {e}")
             finally:
                 await page.close()
 
