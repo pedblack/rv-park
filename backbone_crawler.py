@@ -458,7 +458,27 @@ class P4NScraper:
         if not self.processed_batch:
             return
         new_df = pd.DataFrame(self.processed_batch)
-        final_df = pd.concat([new_df, self.existing_df], ignore_index=True)
+        # Normalize last_scraped to datetime to avoid mixed dtypes (str vs Timestamp)
+        if "last_scraped" in new_df.columns:
+            new_df["last_scraped"] = pd.to_datetime(
+                new_df["last_scraped"], errors="coerce"
+            )
+        else:
+            new_df["last_scraped"] = pd.NaT
+
+        if not self.existing_df.empty and "last_scraped" in self.existing_df.columns:
+            self.existing_df["last_scraped"] = pd.to_datetime(
+                self.existing_df["last_scraped"], errors="coerce"
+            )
+
+        final_df = pd.concat([new_df, self.existing_df], ignore_index=True, sort=False)
+
+        # Ensure the combined column is datetime before sorting
+        if "last_scraped" in final_df.columns:
+            final_df["last_scraped"] = pd.to_datetime(
+                final_df["last_scraped"], errors="coerce"
+            )
+
         final_df.sort_values("last_scraped", ascending=False).drop_duplicates(
             "p4n_id"
         ).to_csv(self.csv_file, index=False)
@@ -475,6 +495,15 @@ if __name__ == "__main__":
         help="Crawl a specific location URL (overrides daily queue)",
     )
     args = parser.parse_args()
+    # Normalize URL input: strip surrounding single/double quotes if present
+    url_arg = None
+    if args.url:
+        url_arg = args.url.strip()
+        if url_arg.startswith("'") and url_arg.endswith("'"):
+            url_arg = url_arg[1:-1]
+        if url_arg.startswith('"') and url_arg.endswith('"'):
+            url_arg = url_arg[1:-1]
+
     asyncio.run(
-        P4NScraper(is_dev=args.dev, force=args.force, single_url=args.url).start()
+        P4NScraper(is_dev=args.dev, force=args.force, single_url=url_arg).start()
     )

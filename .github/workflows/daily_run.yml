@@ -55,11 +55,11 @@ jobs:
           P4N_USERNAME: ${{ secrets.P4N_USERNAME }}
           P4N_PASSWORD: ${{ secrets.P4N_PASSWORD }}
         run: |
-          ARGS=""
-          if [[ "${{ github.event.inputs.mode }}" == "dev" ]]; then ARGS="$ARGS --dev"; fi
-          if [[ "${{ github.event.inputs.force_recrawl }}" == "true" ]]; then ARGS="$ARGS --force"; fi
-          if [[ "${{ github.event.inputs.url }}" != "" ]]; then ARGS="$ARGS --url '${{ github.event.inputs.url }}'"; fi
-          python backbone_crawler.py $ARGS
+          ARGS=()
+          if [[ "${{ github.event.inputs.mode }}" == "dev" ]]; then ARGS+=("--dev"); fi
+          if [[ "${{ github.event.inputs.force_recrawl }}" == "true" ]]; then ARGS+=("--force"); fi
+          if [[ -n "${{ github.event.inputs.url }}" ]]; then ARGS+=("--url" "${{ github.event.inputs.url }}"); fi
+          python backbone_crawler.py "${ARGS[@]}"
 
       - name: Set Intelligence Environment
         # BUG FIX: Persists the correct file names for both following steps
