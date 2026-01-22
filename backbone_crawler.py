@@ -236,12 +236,13 @@ class P4NScraper:
                 PipelineLogger.log_event("GEMINI_ERROR", {"error": str(e), "model": model_name})
                 self.stats["gemini_errors"] += 1
                 return {}
+
     async def extract_atomic(self, context, url, current_num, total_num):
         async with self.semaphore:
             if self.is_dev and self.stats["read"] >= DEV_LIMIT:
                 return
 
-            ts_print(f"➡️  [{current_num}/{total_num}] Scraped Item: {url}")
+            ts_print(f"➡️  [{current_num}/{total_num}] Scraping: {url}")
 
             # Log start of scrape so failures still record which URL caused errors
             p_id_guess = url.split("/")[-1]
@@ -395,7 +396,7 @@ class P4NScraper:
                 self.processed_batch.append(row)
                 self.stats["read"] += 1
             except Exception as e:
-                ts_print(f"⚠️ Error: {e}")
+                ts_print(f"⚠️ Error for {url}: {e}")
             finally:
                 await page.close()
 
