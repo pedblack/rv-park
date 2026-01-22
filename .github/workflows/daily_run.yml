@@ -21,6 +21,11 @@ on:
         required: false
         type: boolean
         default: false
+      url:
+        description: 'Optional single location URL to crawl (overrides queue)'
+        required: false
+        type: string
+        default: ''
 
 jobs:
   scrape_and_visualize:
@@ -53,6 +58,7 @@ jobs:
           ARGS=""
           if [[ "${{ github.event.inputs.mode }}" == "dev" ]]; then ARGS="$ARGS --dev"; fi
           if [[ "${{ github.event.inputs.force_recrawl }}" == "true" ]]; then ARGS="$ARGS --force"; fi
+          if [[ "${{ github.event.inputs.url }}" != "" ]]; then ARGS="$ARGS --url '${{ github.event.inputs.url }}'"; fi
           python backbone_crawler.py $ARGS
 
       - name: Set Intelligence Environment
