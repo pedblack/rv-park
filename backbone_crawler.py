@@ -313,7 +313,7 @@ class P4NScraper:
                         continue
 
                 raw_payload = {
-                    "places_count": int(await self._get_dl(page, "Number of places")),
+                    "places_count": int(val) if (val := await self._get_dl(page, "Number of places")).isdigit() else 0,
                     "parking_cost": await self._get_dl(page, "Parking cost"),
                     "all_reviews": formatted_reviews,
                 }
