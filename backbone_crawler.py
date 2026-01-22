@@ -21,6 +21,7 @@ PROD_CSV = "backbone_locations.csv"
 DEV_CSV = "backbone_locations_dev.csv"
 LOG_FILE = "pipeline_execution.log"
 CONCURRENCY_LIMIT = 3
+MAX_GEMINI_RETRIES = 3
 
 AI_DELAY = 1.0
 STALENESS_DAYS = 30
@@ -201,38 +202,40 @@ class P4NScraper:
             temperature=0.1,
             system_instruction=system_instruction,
         )
-        try:
-            await asyncio.sleep(AI_DELAY)
-            response = await client.aio.models.generate_content(
-                model=model_name, contents=f"ANALYZE:\n{json_payload}", config=config
-            )
-            clean_text = re.sub(r"```json\s*|\s*```", "", response.text).strip()
-            ai_json = json.loads(clean_text)
-            PipelineLogger.log_event(
-                "GEMINI_ANSWER", {"model": model_name, "response": ai_json}
-            )
-            return ai_json
-        except Exception as e:
-            # Count tokens for diagnostics on error
+        
+        for attempt in range(MAX_GEMINI_RETRIES):
             try:
-                token_count_resp = await client.aio.models.count_tokens(
-                    model=model_name, contents=f"ANALYZE:\n{json_payload}"
+                await asyncio.sleep(AI_DELAY * (attempt + 1)) # Wait longer on each attempt
+                
+                response = await client.aio.models.generate_content(
+                    model=model_name, contents=f"ANALYZE:\n{json_payload}", config=config
                 )
-                tokens = token_count_resp.total_tokens
-            except:
-                tokens = "Unknown"
+                
+                clean_text = re.sub(r"```json\s*|\s*```", "", response.text).strip()
+                ai_json = json.loads(clean_text)
+                PipelineLogger.log_event("GEMINI_ANSWER", {"model": model_name, "response": ai_json})
+                return ai_json
 
-            # Immediate console log for the error
-            ts_print(
-                f"❌ [GEMINI ERROR] URL: {url} | Model: {model_name} | Reviews: {num_reviews} | Tokens: {tokens} | Error: {e}"
-            )
+            except Exception as e:
+                # If it's a 503/Overloaded error and we have retries left, continue the loop
+                if "503" in str(e) or "overloaded" in str(e).lower():
+                    if attempt < MAX_RETRIES - 1:
+                        ts_print(f"🔄 [RETRY] Attempt {attempt+1} failed for {url}. Retrying...")
+                        continue
+                
+                # If we're here, it's a different error or we ran out of retries
+                try:
+                    token_count_resp = await client.aio.models.count_tokens(
+                        model=model_name, contents=f"ANALYZE:\n{json_payload}"
+                    )
+                    tokens = token_count_resp.total_tokens
+                except:
+                    tokens = "Unknown"
 
-            PipelineLogger.log_event(
-                "GEMINI_ERROR", {"error": str(e), "model": model_name}
-            )
-            self.stats["gemini_errors"] += 1
-            return {}
-
+                ts_print(f"❌ [GEMINI ERROR] URL: {url} | Model: {model_name} | Reviews: {num_reviews} | Tokens: {tokens} | Error: {e}")
+                PipelineLogger.log_event("GEMINI_ERROR", {"error": str(e), "model": model_name})
+                self.stats["gemini_errors"] += 1
+                return {}
     async def extract_atomic(self, context, url, current_num, total_num):
         async with self.semaphore:
             if self.is_dev and self.stats["read"] >= DEV_LIMIT:
