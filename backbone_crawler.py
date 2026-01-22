@@ -170,7 +170,6 @@ class P4NScraper:
             "SENT_TO_GEMINI", {"payload": raw_data, "model": model_name}
         )
 
-        # ENHANCED STRATEGIC PROMPT
         system_instruction = """Analyze the provided property data and reviews. You MUST identify recurring themes and count their occurrences across all reviews. Return JSON ONLY. Use snake_case.
 
         Schema:
@@ -204,7 +203,8 @@ class P4NScraper:
         
         for attempt in range(MAX_GEMINI_RETRIES):
             try:
-                await asyncio.sleep(AI_DELAY * (attempt + 1)) # Wait longer on each attempt
+                # Exponential backoff: wait longer on each attempt
+                await asyncio.sleep(AI_DELAY * (attempt + 1)) 
                 
                 response = await client.aio.models.generate_content(
                     model=model_name, contents=f"ANALYZE:\n{json_payload}", config=config
@@ -216,13 +216,13 @@ class P4NScraper:
                 return ai_json
 
             except Exception as e:
-                # If it's a 503/Overloaded error and we have retries left, continue the loop
+                # Check for transient 503 or Overloaded errors for retry
                 if "503" in str(e) or "overloaded" in str(e).lower():
                     if attempt < MAX_GEMINI_RETRIES - 1:
                         ts_print(f"🔄 [RETRY] Attempt {attempt+1} failed for {url}. Retrying...")
                         continue
                 
-                # If we're here, it's a different error or we ran out of retries
+                # If non-retryable or attempts exhausted, capture token count and log error
                 try:
                     token_count_resp = await client.aio.models.count_tokens(
                         model=model_name, contents=f"ANALYZE:\n{json_payload}"
@@ -243,7 +243,6 @@ class P4NScraper:
 
             ts_print(f"➡️  [{current_num}/{total_num}] Scraping: {url}")
 
-            # Log start of scrape so failures still record which URL caused errors
             p_id_guess = url.split("/")[-1]
             PipelineLogger.log_event(
                 "START_SCRAPE",
@@ -260,77 +259,46 @@ class P4NScraper:
                 await page.goto(url, wait_until="domcontentloaded", timeout=30000)
                 await page.wait_for_selector(".place-feedback-average", timeout=10000)
 
-                # Wait for DOM rendering
                 await asyncio.sleep(5.0)
 
                 stats_container = page.locator(".place-feedback-average")
-                raw_count_text = await stats_container.locator("strong").text_content()
                 
                 # DEFENSIVE FIX: Extract review count safely to avoid NoneType error
+                raw_count_text = await stats_container.locator("strong").text_content()
                 count_match = re.search(r"(\d+)", raw_count_text)
                 actual_feedback_count = int(count_match.group(1)) if count_match else 0
 
                 if actual_feedback_count < MIN_REVIEWS_THRESHOLD:
-                    ts_print(
-                        f"🗑️  [DISCARD] Low feedback ({actual_feedback_count} reviews) for: {url}"
-                    )
+                    ts_print(f"🗑️  [DISCARD] Low feedback ({actual_feedback_count} reviews) for: {url}")
                     self.stats["discarded_low_feedback"] += 1
                     return
 
-                p_id = (
-                    await page.locator("body").get_attribute("data-place-id")
-                    or url.split("/")[-1]
-                )
-                title = (
-                    (await page.locator("h1").first.text_content())
-                    .split("\n")[0]
-                    .strip()
-                )
+                p_id = await page.locator("body").get_attribute("data-place-id") or url.split("/")[-1]
+                title = ((await page.locator("h1").first.text_content()).split("\n")[0].strip())
 
                 lat, lng = 0.0, 0.0
                 coord_link_el = page.locator("a[href*='lat='][href*='lng=']").first
-                coord_link = (
-                    await coord_link_el.get_attribute("href")
-                    if await coord_link_el.count() > 0
-                    else None
-                )
+                coord_link = await coord_link_el.get_attribute("href") if await coord_link_el.count() > 0 else None
                 if coord_link:
-                    m = re.search(
-                        r"lat=([-+]?\d*\.\d+|\d+)&lng=([-+]?\d*\.\d+|\d+)", coord_link
-                    )
+                    m = re.search(r"lat=([-+]?\d*\.\d+|\d+)&lng=([-+]?\d*\.\d+|\d+)", coord_link)
                     if m:
                         lat, lng = float(m.group(1)), float(m.group(2))
 
-                # Fetch ALL reviews using text_content to capture hidden ones
                 review_articles = await page.locator(".place-feedback-article").all()
                 formatted_reviews, review_seasonality = [], {}
 
                 for article in review_articles:
                     try:
-                        date_text = await article.locator(
-                            "span.caption.text-gray"
-                        ).text_content()
-                        text_val = await article.locator(
-                            ".place-feedback-article-content"
-                        ).text_content()
+                        date_text = await article.locator("span.caption.text-gray").text_content()
+                        text_val = await article.locator(".place-feedback-article-content").text_content()
                         date_parts = date_text.strip().split("/")
                         if len(date_parts) == 3:
-                            # Parse date and check if within last 2 years
-                            date_val = (
-                                f"{date_parts[2]}-{date_parts[1]}-{date_parts[0]}"
-                            )
+                            date_val = f"{date_parts[2]}-{date_parts[1]}-{date_parts[0]}"
                             if is_review_within_years(date_val, REVIEW_YEARS):
                                 month_key = f"{date_parts[2]}-{date_parts[1]}"
-                                review_seasonality[month_key] = (
-                                    review_seasonality.get(month_key, 0) + 1
-                                )
-                                formatted_reviews.append(
-                                    f"[{date_val}]: {text_val.strip()}"
-                                )
-                        else:
-                            date_val = "Unknown"
-                    except:
-                        continue
+                                review_seasonality[month_key] = review_seasonality.get(month_key, 0) + 1
+                                formatted_reviews.append(f"[{date_val}]: {text_val.strip()}")
+                    except: continue
 
                 raw_payload = {
                     "places_count": int(val) if (val := await self._get_dl(page, "Number of places")).isdigit() else 0,
@@ -338,65 +306,35 @@ class P4NScraper:
                     "all_reviews": formatted_reviews,
                 }
 
-                # Dynamic Gemini model selection based on number of filtered reviews
                 review_count = len(formatted_reviews)
-                if review_count > REVIEW_COUNT_THRESHOLD:
-                    selected_model = FLASH_MODEL
-                else:
-                    selected_model = LITE_MODEL
+                selected_model = FLASH_MODEL if review_count > REVIEW_COUNT_THRESHOLD else LITE_MODEL
 
-                # Passing 'url' to enable immediate diagnostic logging on error
+                # Pass 'url' to enable immediate diagnostic logging on error
                 ai_data = await self.analyze_with_ai(raw_payload, selected_model, url)
                 top_langs = ai_data.get("top_languages", [])
                 pros_cons = ai_data.get("pros_cons") or {}
 
-                # Defensively extract average rating
+                # DEFENSIVE FIX: Extract average rating safely to avoid NoneType error
                 rating_text = await stats_container.locator(".text-gray").text_content()
                 rating_match = re.search(r"(\d+\.?\d*)", rating_text)
                 avg_rating = float(rating_match.group(1)) if rating_match else 0.0
 
                 row = {
-                    "p4n_id": p_id,
-                    "title": title,
-                    "url": url,
-                    "latitude": lat,
-                    "longitude": lng,
-                    "location_type": await self._get_type(page),
-                    "num_places": ai_data.get("num_places"),
-                    "total_reviews": actual_feedback_count,
-                    "avg_rating": avg_rating,
-                    "parking_min_eur": ai_data.get("parking_min"),
-                    "parking_max_eur": ai_data.get("parking_max"),
-                    "electricity_eur": ai_data.get("electricity_eur"),
-                    "review_seasonality": json.dumps(review_seasonality),
-                    "top_languages": "; ".join(
-                        [
-                            f"{l.get('lang')} ({l.get('count')})"
-                            for l in top_langs
-                            if isinstance(l, dict)
-                        ]
-                    ),
-                    "ai_pros": "; ".join(
-                        [
-                            f"{p.get('topic')} ({p.get('count')})"
-                            for p in pros_cons.get("pros", [])
-                            if isinstance(p, dict)
-                        ]
-                    ),
-                    "ai_cons": "; ".join(
-                        [
-                            f"{c.get('topic')} ({c.get('count')})"
-                            for c in pros_cons.get("cons", [])
-                            if isinstance(c, dict)
-                        ]
-                    ),
+                    "p4n_id": p_id, "title": title, "url": url, "latitude": lat, "longitude": lng,
+                    "location_type": await self._get_type(page), "num_places": ai_data.get("num_places"),
+                    "total_reviews": actual_feedback_count, "avg_rating": avg_rating,
+                    "parking_min_eur": ai_data.get("parking_min"), "parking_max_eur": ai_data.get("parking_max"),
+                    "electricity_eur": ai_data.get("electricity_eur"), "review_seasonality": json.dumps(review_seasonality),
+                    "top_languages": "; ".join([f"{l.get('lang')} ({l.get('count')})" for l in top_langs if isinstance(l, dict)]),
+                    "ai_pros": "; ".join([f"{p.get('topic')} ({p.get('count')})" for p in pros_cons.get("pros", []) if isinstance(p, dict)]),
+                    "ai_cons": "; ".join([f"{c.get('topic')} ({c.get('count')})" for c in pros_cons.get("cons", []) if isinstance(c, dict)]),
                     "last_scraped": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 }
                 PipelineLogger.log_event("STORED_ROW", row)
                 self.processed_batch.append(row)
                 self.stats["read"] += 1
             except Exception as e:
-                ts_print(f"⚠️ Error for {url} - {e}")
+                ts_print(f"⚠️ Error for {url}: {e}")
             finally:
                 await page.close()
 
