@@ -369,31 +369,41 @@ class P4NScraper:
                 target_urls = [self.single_url]
                 current_idx, total_idx = 1, 1
             else:
-                target_urls, current_idx, total_idx = DailyQueueManager.get_next_partition()
+                target_urls, current_idx, total_idx = (
+                    DailyQueueManager.get_next_partition()
+                )
 
             ts_print("=" * 60)
-            ts_print(f"🔍 [SEARCH PAGE] Scraping: {target_urls[0] if target_urls else 'N/A'}")
+            ts_print(
+                f"🔍 [SEARCH PAGE] Scraping: {target_urls[0] if target_urls else 'N/A'}"
+            )
             ts_print(f"📅 [PARTITION] Day {current_idx} of {total_idx}")
             ts_print("=" * 60)
 
-            discovery_links = []
-            for url in target_urls:
-                await page.goto(url, wait_until="domcontentloaded")
-                try:
-                    await page.wait_for_selector("a[href*='/place/']", timeout=5000)
-                except:
-                    pass
-                links = await page.locator("a[href*='/place/']").all()
-                for link in links:
-                    href = await link.get_attribute("href")
-                    if href:
-                        discovery_links.append(
-                            f"https://park4night.com{href}"
-                            if href.startswith("/")
-                            else href
-                        )
+            # If a single URL was provided, treat it as the exact place to crawl
+            # and skip discovery of additional linked place entries. This avoids
+            # crawling other locale variants or related places found on the page.
+            if self.single_url:
+                discovered = [self.single_url]
+            else:
+                discovery_links = []
+                for url in target_urls:
+                    await page.goto(url, wait_until="domcontentloaded")
+                    try:
+                        await page.wait_for_selector("a[href*='/place/']", timeout=5000)
+                    except:
+                        pass
+                    links = await page.locator("a[href*='/place/']").all()
+                    for link in links:
+                        href = await link.get_attribute("href")
+                        if href:
+                            discovery_links.append(
+                                f"https://park4night.com{href}"
+                                if href.startswith("/")
+                                else href
+                            )
 
-            discovered = list(set(discovery_links))
+                discovered = list(set(discovery_links))
 
             if self.is_dev:
                 ts_print(f"🛠️  [DEV MODE] Seeking {DEV_LIMIT} successful run(s)...")
