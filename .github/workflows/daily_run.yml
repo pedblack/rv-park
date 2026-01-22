@@ -95,4 +95,10 @@ jobs:
           git config --global user.name "P4N Bot"
           git config --global user.email "bot@github.com"
           git add backbone_locations.csv index.html queue_state.json strategic_analysis.json
-          git diff --staged --quiet || (git commit -m "Auto-update strategic intelligence [skip ci]" && git push)
+          # Check if there are changes to commit
+          if ! git diff --staged --quiet; then
+            git commit -m "Auto-update strategic intelligence [skip ci]"
+            # Pull remote changes and rebase your local commit on top of them
+            git pull --rebase origin main
+            git push
+          fi
