@@ -313,7 +313,7 @@ class P4NScraper:
                         continue
 
                 raw_payload = {
-                    "places_count": await self._get_dl(page, "Number of places"),
+                    "places_count": int(await self._get_dl(page, "Number of places")),
                     "parking_cost": await self._get_dl(page, "Parking cost"),
                     "all_reviews": formatted_reviews,
                 }
