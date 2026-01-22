@@ -113,7 +113,8 @@ def generate_map():
             icon=folium.Icon(color=marker_color, icon=icon_type, prefix='fa')
         )
         
-        marker.options['extraData'] = {{
+        # Fixed: Removed double curly braces to prevent unhashable type error
+        marker.options['extraData'] = {
             'rating': float(row['avg_rating']),
             'places': int(num_places),
             'reviews': int(row['total_reviews']),
@@ -121,7 +122,7 @@ def generate_map():
             'seasonality': row['review_seasonality'] if pd.notna(row['review_seasonality']) else "{}",
             'pros': row['ai_pros'] if pd.notna(row['ai_pros']) else "",
             'cons': row['ai_cons'] if pd.notna(row['ai_cons']) else ""
-        }}
+        }
         marker.add_to(marker_layer)
 
     strat_box = f"""
@@ -267,13 +268,11 @@ def generate_map():
     }}
 
     function applyFilters() {{
-        // Extract handle values from noUiSlider objects
         const [minR, maxR] = sRating.noUiSlider.get().map(parseFloat);
         const [minP, maxP] = sPlaces.noUiSlider.get().map(parseInt);
         const selTypes = Array.from(document.getElementById('sel-type').selectedOptions).map(o => o.value);
 
         var targetLayer = window['{layer_var}'];
-        // Ensure we capture original markers before first clear
         if (!markerStore) markerStore = targetLayer.getLayers();
 
         targetLayer.clearLayers();
@@ -298,7 +297,6 @@ def generate_map():
     
     window.onload = () => {{
         initSliders();
-        // Delay update to ensure Folium layers are registered
         setTimeout(() => {{
             var layer = window['{layer_var}'];
             if (layer) updateDashboard(layer.getLayers());
