@@ -245,10 +245,11 @@ class P4NScraper:
                 await asyncio.sleep(5.0)
 
                 stats_container = page.locator(".place-feedback-average")
+                
+                # Defensively extract review count
                 raw_count_text = await stats_container.locator("strong").text_content()
-                actual_feedback_count = int(
-                    re.search(r"(\d+)", raw_count_text).group(1)
-                )
+                count_match = re.search(r"(\d+)", raw_count_text)
+                actual_feedback_count = int(count_match.group(1)) if count_match else 0
 
                 if actual_feedback_count < MIN_REVIEWS_THRESHOLD:
                     ts_print(
@@ -329,6 +330,11 @@ class P4NScraper:
                 top_langs = ai_data.get("top_languages", [])
                 pros_cons = ai_data.get("pros_cons") or {}
 
+                # Defensively extract average rating
+                rating_text = await stats_container.locator(".text-gray").text_content()
+                rating_match = re.search(r"(\d+\.?\d*)", rating_text)
+                avg_rating = float(rating_match.group(1)) if rating_match else 0.0
+
                 row = {
                     "p4n_id": p_id,
                     "title": title,
@@ -338,12 +344,7 @@ class P4NScraper:
                     "location_type": await self._get_type(page),
                     "num_places": ai_data.get("num_places"),
                     "total_reviews": actual_feedback_count,
-                    "avg_rating": float(
-                        re.search(
-                            r"(\d+\.?\d*)",
-                            await stats_container.locator(".text-gray").text_content(),
-                        ).group(1)
-                    ),
+                    "avg_rating": avg_rating,
                     "parking_min_eur": ai_data.get("parking_min"),
                     "parking_max_eur": ai_data.get("parking_max"),
                     "electricity_eur": ai_data.get("electricity_eur"),
