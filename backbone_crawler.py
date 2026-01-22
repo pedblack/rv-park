@@ -156,11 +156,14 @@ class P4NScraper:
                 pass
         return pd.DataFrame()
 
-    async def analyze_with_ai(self, raw_data, model_name):
+    async def analyze_with_ai(self, raw_data, model_name, url):
         if model_name == FLASH_MODEL:
             self.stats["gemini_flash_calls"] += 1
         else:
             self.stats["gemini_lite_calls"] += 1
+
+        num_reviews = len(raw_data.get("all_reviews", []))
+        json_payload = json.dumps(raw_data, default=str, ensure_ascii=False)
 
         PipelineLogger.log_event(
             "SENT_TO_GEMINI", {"payload": raw_data, "model": model_name}
@@ -192,7 +195,6 @@ class P4NScraper:
 
         Example Theme Format: {"topic": "quiet at night", "count": 5}"""
 
-        json_payload = json.dumps(raw_data, default=str, ensure_ascii=False)
         # Added response_mime_type for strict JSON enforcement
         config = types.GenerateContentConfig(
             response_mime_type="application/json",
@@ -211,6 +213,20 @@ class P4NScraper:
             )
             return ai_json
         except Exception as e:
+            # Count tokens for diagnostics on error
+            try:
+                token_count_resp = await client.aio.models.count_tokens(
+                    model=model_name, contents=f"ANALYZE:\n{json_payload}"
+                )
+                tokens = token_count_resp.total_tokens
+            except:
+                tokens = "Unknown"
+
+            # Immediate console log for the error
+            ts_print(
+                f"❌ [GEMINI ERROR] URL: {url} | Model: {model_name} | Reviews: {num_reviews} | Tokens: {tokens} | Error: {e}"
+            )
+
             PipelineLogger.log_event(
                 "GEMINI_ERROR", {"error": str(e), "model": model_name}
             )
@@ -245,11 +261,10 @@ class P4NScraper:
                 await asyncio.sleep(5.0)
 
                 stats_container = page.locator(".place-feedback-average")
-                
-                # Defensively extract review count
                 raw_count_text = await stats_container.locator("strong").text_content()
-                count_match = re.search(r"(\d+)", raw_count_text)
-                actual_feedback_count = int(count_match.group(1)) if count_match else 0
+                actual_feedback_count = int(
+                    re.search(r"(\d+)", raw_count_text).group(1)
+                )
 
                 if actual_feedback_count < MIN_REVIEWS_THRESHOLD:
                     ts_print(
@@ -326,7 +341,8 @@ class P4NScraper:
                 else:
                     selected_model = LITE_MODEL
 
-                ai_data = await self.analyze_with_ai(raw_payload, selected_model)
+                # Passing 'url' to enable immediate diagnostic logging on error
+                ai_data = await self.analyze_with_ai(raw_payload, selected_model, url)
                 top_langs = ai_data.get("top_languages", [])
                 pros_cons = ai_data.get("pros_cons") or {}
 
