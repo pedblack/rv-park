@@ -1,0 +1,3 @@
+p4n_id,latitude,longitude,avg_rating,num_places,total_reviews,location_type,title,url,parking_min_eur,parking_max_eur,electricity_eur,review_seasonality,ai_pros,ai_cons
+1,38.1,-8.6,4.5,10,50,Camping,"Camping Sunny",http://example.com,5,5,3,"{\"2024-08\":5}","Good view (5)","Noisy (2)"
+2,38.2,-8.7,3.0,5,20,Parking lot day/night,"Parking Central",http://example.com,0,0,0,"{\"2024-07\":2}","Free (2)","Crowded (1)"

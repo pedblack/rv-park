@@ -1,8 +1,9 @@
-import pandas as pd
-import folium
-import os
 import json
+import os
+
+import folium
 import numpy as np
+import pandas as pd
 
 # Use environment variables to support both prod and dev modes
 CSV_FILE = os.environ.get("CSV_FILE", "backbone_locations.csv")
