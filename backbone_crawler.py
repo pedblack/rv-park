@@ -127,9 +127,10 @@ client = genai.Client(api_key=GEMINI_API_KEY)
 
 
 class P4NScraper:
-    def __init__(self, is_dev=False, force=False):
+    def __init__(self, is_dev=False, force=False, single_url=None):
         self.is_dev = is_dev
         self.force = force
+        self.single_url = single_url
         self.csv_file = DEV_CSV if is_dev else PROD_CSV
         self.processed_batch = []
         self.existing_df = self._load_existing()
@@ -364,12 +365,14 @@ class P4NScraper:
             page = await context.new_page()
             await Stealth().apply_stealth_async(page)
 
-            target_urls, current_idx, total_idx = DailyQueueManager.get_next_partition()
+            if self.single_url:
+                target_urls = [self.single_url]
+                current_idx, total_idx = 1, 1
+            else:
+                target_urls, current_idx, total_idx = DailyQueueManager.get_next_partition()
 
             ts_print("=" * 60)
-            ts_print(
-                f"🔍 [SEARCH PAGE] Scraping: {target_urls[0] if target_urls else 'N/A'}"
-            )
+            ts_print(f"🔍 [SEARCH PAGE] Scraping: {target_urls[0] if target_urls else 'N/A'}")
             ts_print(f"📅 [PARTITION] Day {current_idx} of {total_idx}")
             ts_print("=" * 60)
 
@@ -448,7 +451,7 @@ class P4NScraper:
             ts_print(f"🤖 Total Gemini AI Calls: {self.stats['gemini_calls']}")
             ts_print("=" * 40)
 
-            if not self.is_dev:
+            if not self.is_dev and not self.single_url:
                 DailyQueueManager.increment_state()
 
     def _upsert_and_save(self):
@@ -465,7 +468,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--dev", action="store_true")
     parser.add_argument("--force", action="store_true")
+    parser.add_argument(
+        "--url",
+        type=str,
+        default=None,
+        help="Crawl a specific location URL (overrides daily queue)",
+    )
     args = parser.parse_args()
-    asyncio.run(P4NScraper(is_dev=args.dev, force=args.force).start())
-    asyncio.run(P4NScraper(is_dev=args.dev, force=args.force).start())
-    asyncio.run(P4NScraper(is_dev=args.dev, force=args.force).start())
+    asyncio.run(
+        P4NScraper(is_dev=args.dev, force=args.force, single_url=args.url).start()
+    )
