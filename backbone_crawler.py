@@ -16,6 +16,7 @@ from playwright_stealth import Stealth
 # --- CONFIGURABLE CONSTANTS ---
 FLASH_MODEL = "gemini-2.5-flash"
 LITE_MODEL = "gemini-2.5-flash-lite"
+REVIEW_COUNT_THRESHOLD = 100  # Threshold to switch between Lite and Flash models
 PROD_CSV = "backbone_locations.csv"
 DEV_CSV = "backbone_locations_dev.csv"
 LOG_FILE = "pipeline_execution.log"
@@ -317,7 +318,7 @@ class P4NScraper:
 
                 # Dynamic Gemini model selection based on number of filtered reviews
                 review_count = len(formatted_reviews)
-                if review_count > 100:
+                if review_count > REVIEW_COUNT_THRESHOLD:
                     selected_model = FLASH_MODEL
                 else:
                     selected_model = LITE_MODEL
