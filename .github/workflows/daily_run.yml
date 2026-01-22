@@ -79,6 +79,9 @@ jobs:
       - name: Generate Visualization
         run: python visualize_land.py
 
+      - name: Create CNAME
+        run: echo "auroreandpedro.com" > CNAME
+
       - name: Upload Pipeline Artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -89,6 +92,7 @@ jobs:
             strategic_analysis.json
             *.csv
             index.html
+            CNAME
 
       - name: Commit and Push (Prod Only)
         # Runs on schedule OR if mode is NOT dev
