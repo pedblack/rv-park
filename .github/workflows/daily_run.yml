@@ -92,20 +92,24 @@ jobs:
             index.html
 
       - name: Commit and Push (Prod Only)
+        # Run on schedule OR if mode is explicitly set to prod
         if: github.event_name == 'schedule' || github.event.inputs.mode == 'prod'
         run: |
           git config --global user.name "P4N Bot"
           git config --global user.email "bot@github.com"
           
-          # Force a small change to verify the push logic is working
-          date > last_run.txt
+          # Add files only if they exist to prevent "pathspec did not match" errors
+          [ -f index.html ] && git add index.html
+          [ -f backbone_locations.csv ] && git add backbone_locations.csv
+          [ -f queue_state.json ] && git add queue_state.json
+          [ -f strategic_analysis.json ] && git add strategic_analysis.json
           
-          git add backbone_locations.csv index.html queue_state.json strategic_analysis.json last_run.txt
-          
+          # Check for actual data changes
           if ! git diff --staged --quiet; then
             git commit -m "Auto-update strategic intelligence [skip ci]"
+            # Synchronization fix for concurrent runs
             git pull --rebase origin main
             git push origin main
           else
-            echo "No changes detected."
+            echo "No changes detected. Skipping push."
           fi
