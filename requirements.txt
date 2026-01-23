@@ -9,6 +9,6 @@ playwright-stealth
 pydantic
 python-dotenv
 pytest
+scikit-learn
 selenium
-sklearn
 webdriver-manager
