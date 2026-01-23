@@ -5,6 +5,7 @@
         "market_gap": "High frustration index identified in cluster."
     },
     "full_score_map": {
+        "517666": 52.68,
         "225839": 52.68,
         "349389": 52.68,
         "619224": 52.68,
@@ -529,7 +530,7 @@
             ]
         },
         {
-            "cluster_name": "Region 0 ((8650) TerraYah)",
+            "cluster_name": "Region 0 ((8550) Orange E)",
             "opportunity_score": 52.68,
             "top_performing_p4n_ids": [
                 166229,
