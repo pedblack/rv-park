@@ -55,7 +55,7 @@ jobs:
         run: |
           pytest tests/*.py
 
-      - name: Run Unified Scraper
+      - name: Run Scraper
         if: github.event.inputs.skip_crawl != 'true'
         env:
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
