@@ -172,33 +172,34 @@ class P4NScraper:
 
         system_instruction = """Analyze the provided property data and reviews. You MUST identify recurring themes and count their occurrences across all reviews. Return JSON ONLY. Use snake_case.
 
-        ### TAXONOMY (Use ONLY these keys for pros_cons) ###
-
+        ### TAXONOMY (Strictly Use ONLY these keys) ###
+        
         PRO_KEYS:
-        - quiet_peaceful_atmosphere, beautiful_scenery_views, friendly_welcoming_staff, clean_sanitary_facilities, hot_showers_available, spacious_pitches, flat_level_spots, shaded_parking_areas, good_value_affordable, free_parking_services, proximity_to_beach, proximity_to_town_center, proximity_to_supermarkets_shops, restaurant_bar_nearby, bakery_service_bread_available, water_fill_waste_disposal_available, electricity_available_included, good_wifi_internet_signal, dog_friendly_environment, safe_secure_location, swimming_pool_lake_access, hiking_walking_trails_nearby, cycling_bike_paths_nearby, family_child_friendly, easy_access_large_vehicles, washing_machines_laundry_service, nature_wildlife_setting, good_mobile_signal_5g, lpg_gpl_available, farm_animals_interaction, starry_sky_stargazing, sunset_sunrise_views, convivial_community_vibe, automated_self_checkin, eco_friendly_permaculture, modern_functional_units, acsi_discount_accepted, helpful_local_tips, specialized_activities_hobbies
+        - atmosphere_quiet_peaceful, scenery_natural_beauty, views_sunset_starry_sky, staff_friendly_helpful, service_multilingual_welcoming, tips_local_knowledge, facilities_clean_modern, showers_hot_high_pressure, laundry_effective_available, pitches_spacious_private, ground_flat_level_paved, shade_natural_provided, value_affordable_fair, discounts_accepted_acsi, pricing_transparent_simple, location_beach_water_access, location_town_center_proximity, location_nature_trails_access, supplies_nearby_shops_fuel, services_bread_delivery_onsite, catering_bar_restaurant_onsite, utilities_reliable_electricity, water_potable_easy_refill, waste_disposal_functional, connectivity_strong_wifi, connectivity_good_5g_mobile, safety_secure_fenced_monitored, safety_feeling_safe_community, pet_friendly_amenities, family_child_friendly_playground, access_easy_large_vehicles, checkin_automated_flexible_process, activities_onsite_yoga_pool, unique_vibe_creative_eco_farm, utilities_lpg_gpl_specialist, activities_farm_eco_interaction, heritage_culture_history, misc_other_pros
         
         CON_KEYS:
-        - noise_disturbance_general, road_traffic_noise, barking_dogs, construction_noise, dirty_unkept_facilities, unpleasant_smells, litter_trash_accumulation, uneven_sloping_ground, muddy_terrain, dusty_environment, difficult_access_narrow_roads, tight_maneuvering_small_spaces, overcrowded_packed, expensive_overpriced, payment_issues_friction, lack_of_services, broken_outdated_facilities, cold_showers_no_hot_water, poor_wifi_signal, insects_mosquitoes_flies, stray_animals_pests, unsafe_insecure_feeling, police_fines_risk, long_distance_amenities, rude_staff_unfriendly, limited_opening_hours_access, airplane_noise, early_morning_deliveries, loud_music_parties, unpleasant_smells_sewage, poor_animal_welfare, height_length_restrictions, overgrown_vegetation_branches, theft_breakin_risk, suspicious_characters_loitering, low_water_pressure_flow, electricity_tripping_limited, payment_issues_cash_only, strict_fussy_rules, lack_of_shade, no_services_available
-
+        - noise_traffic_airplane_loud, noise_dogs_animals_neighbors, noise_events_music_parties, cleanliness_dirty_unkept, facilities_broken_outdated, showers_cold_low_pressure, terrain_uneven_sloping, terrain_muddy_dusty_flooding, shade_lack_of_exposed, access_difficult_narrow_steep, maneuvering_tight_spaces_restrictions, overcrowding_packed_residents, space_cramped_lack_of_privacy, price_expensive_overpriced, payment_issues_cash_only_friction, service_lack_of_amenities, service_staff_rude_unfriendly, checkin_rules_restrictive_slow, wifi_poor_unreliable_signal, mobile_signal_weak_dead_zone, safety_theft_risk_loitering, safety_police_fines_eviction_risk, environment_pests_insects_smells, environment_litter_trash_accumulation, utilities_electricity_tripping, utilities_water_nonpotable_slow, signage_unclear_directions, location_remote_isolated_far, rules_strict_fussy_unpleasant, environment_radiation_emf, social_niche_demographic, situational_temporary_blockage, misc_other_cons
+        
         ### JSON SCHEMA ###
         {
-        "num_places": int,
-        "parking_min": float,
-        "parking_max": float,
-        "electricity_eur": float,
-        "top_languages": [ {"lang": "string", "count": int} ],
-        "pros_cons": {
-            "pros": [ {"topic": "string", "count": int} ],
-            "cons": [ {"topic": "string", "count": int} ]
+            "num_places": int,
+            "parking_min": float,
+            "parking_max": float,
+            "electricity_eur": float,
+            "top_languages": [ {"lang": "string", "count": int} ],
+            "pros_cons": {
+                "pros": [ {"topic": "string", "count": int} ],
+                "cons": [ {"topic": "string", "count": int} ]
+            }
         }
-        }
-
+        
         ### INSTRUCTIONS ###
-        1. num_places: Extract from the 'places_count' field.
-        2. Pricing: Extract min/max range. If included in parking, set electricity_eur to 0.0.
-        3. Missing Data: Use null for missing numeric data. Do not hallucinate.
-        4. Themes: Map review comments to the closest matching key in the TAXONOMY. If a specific review does not fit any key, ignore that specific point to avoid noise.
-        5. Priorities: For 'cons', specifically ensure police_fines_risk and overcrowded_packed are accurately counted to feed the Frustration Index."""
+        1. num_places: Extract from 'places_count' field. Use null if not found.
+        2. Pricing: Extract min/max range. If electricity is included in parking fee, set electricity_eur to 0.0.
+        3. Themes: Map review comments to the closest matching key in the TAXONOMY.
+        4. Handling Misc: If a review point does not fit any specific category, map it to 'misc_other_pros' or 'misc_other_cons' accordingly. Do not ignore any feedback.
+        5. Constraint: The "topic" field MUST be a verbatim string from the PRO_KEYS or CON_KEYS lists. Do not create your own keys.
+        6. Output: Return ONLY the raw JSON object. No preamble, no markdown backticks."""
 
         config = types.GenerateContentConfig(
             response_mime_type="application/json",
