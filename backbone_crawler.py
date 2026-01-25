@@ -209,7 +209,6 @@ class P4NScraper:
 
         for attempt in range(MAX_GEMINI_RETRIES):
             try:
-                # Exponential backoff: wait longer on each attempt
                 await asyncio.sleep(AI_DELAY * (attempt + 1))
 
                 response = await client.aio.models.generate_content(
@@ -218,23 +217,26 @@ class P4NScraper:
                     config=config,
                 )
 
+                # Attempt to parse JSON immediately inside the try block
                 clean_text = re.sub(r"```json\s*|\s*```", "", response.text).strip()
                 ai_json = json.loads(clean_text)
+                
                 PipelineLogger.log_event(
                     "GEMINI_ANSWER", {"model": model_name, "response": ai_json}
                 )
                 return ai_json
 
-            except Exception as e:
-                # Check for transient 503 or Overloaded errors for retry
-                if "503" in str(e) or "overloaded" in str(e).lower():
-                    if attempt < MAX_GEMINI_RETRIES - 1:
-                        ts_print(
-                            f"🔄 [RETRY] Attempt {attempt+1} failed for {url}. Retrying..."
-                        )
-                        continue
+            except (json.JSONDecodeError, Exception) as e:
+                # Force retry for JSON errors OR transient API errors
+                is_json_error = isinstance(e, json.JSONDecodeError)
+                err_msg = str(e).lower()
+                is_transient = "503" in err_msg or "overloaded" in err_msg or "deadline" in err_msg
 
-                # If non-retryable or attempts exhausted, capture token count and log error
+                if (is_json_error or is_transient) and attempt < MAX_GEMINI_RETRIES - 1:
+                    ts_print(f"🔄 [RETRY {attempt+1}/{MAX_GEMINI_RETRIES}] {type(e).__name__} for {url}. Retrying...")
+                    continue
+
+                # Final Failure Logic
                 try:
                     token_count_resp = await client.aio.models.count_tokens(
                         model=model_name, contents=f"ANALYZE:\n{json_payload}"
@@ -243,12 +245,8 @@ class P4NScraper:
                 except:
                     tokens = "Unknown"
 
-                ts_print(
-                    f"❌ [GEMINI ERROR] URL: {url} | Model: {model_name} | Reviews: {num_reviews} | Tokens: {tokens} | Error: {e}"
-                )
-                PipelineLogger.log_event(
-                    "GEMINI_ERROR", {"error": str(e), "model": model_name}
-                )
+                ts_print(f"❌ [GEMINI ERROR] URL: {url} | Error: {e}")
+                PipelineLogger.log_event("GEMINI_ERROR", {"error": str(e), "model": model_name})
                 self.stats["gemini_errors"] += 1
                 return {}
 
