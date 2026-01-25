@@ -5,6 +5,7 @@
         "market_gap": "High frustration index identified in cluster."
     },
     "full_score_map": {
+        "99805": 52.99,
         "122829": 52.99,
         "475330": 52.99,
         "23784": 52.99,
@@ -22,7 +23,6 @@
         "553945": 52.99,
         "169931": 52.99,
         "314760": 52.99,
-        "99805": 52.99,
         "26016": 52.99,
         "40034": 52.99,
         "89145": 52.99,
@@ -578,7 +578,7 @@
             ]
         },
         {
-            "cluster_name": "Region 0 ((7520-151) Sine)",
+            "cluster_name": "Region 0 ((7630-208) Odem)",
             "opportunity_score": 52.99,
             "top_performing_p4n_ids": [
                 166229,
