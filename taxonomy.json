@@ -9,40 +9,52 @@
       "description": "Aesthetic appeal of the surrounding landscape, nature, and environment."
     },
     {
-      "topic": "views_sunset_starry_sky",
-      "description": "Excellent visibility for sunsets or low light pollution for stargazing."
+      "topic": "views_sunset_aesthetic",
+      "description": "Excellent aesthetic views of the horizon, sunsets, or surrounding scenery."
+    },
+    {
+      "topic": "environment_low_light_pollution",
+      "description": "Technical environmental quality of darkness, ideal for stargazing or astrophotography."
     },
     {
       "topic": "staff_friendly_helpful",
-      "description": "Personal interactions with owners or employees are positive and welcoming."
+      "description": "Positive human interaction with owners or employees."
     },
     {
-      "topic": "service_multilingual_welcoming",
-      "description": "Staff can communicate in multiple languages or go out of their way to assist international guests."
+      "topic": "service_multilingual_human",
+      "description": "Staff members speak multiple languages to assist international guests."
+    },
+    {
+      "topic": "checkin_automated_multilingual",
+      "description": "Self-service kiosks or machines that support multiple language options."
     },
     {
       "topic": "tips_local_knowledge",
-      "description": "Provision of valuable advice about the surrounding area, hidden gems, or specific navigation."
+      "description": "Provision of valuable advice about the area, hidden gems, or navigation."
     },
     {
       "topic": "facilities_clean_modern",
-      "description": "Sanitary blocks, kitchens, or common areas are in good repair and hygienic."
+      "description": "Sanitary blocks or common areas are in good repair and hygienic."
     },
     {
       "topic": "showers_hot_high_pressure",
-      "description": "Showers provide reliable hot water and strong water flow."
+      "description": "Showers provide reliable hot water and strong flow."
     },
     {
       "topic": "laundry_effective_available",
-      "description": "Washing machines and dryers are present and work correctly."
+      "description": "Washing machines and dryers are present and functional."
     },
     {
       "topic": "pitches_spacious_private",
-      "description": "Individual parking spots are large and offer privacy from neighbors."
+      "description": "Individual spots are large and offer privacy from neighbors."
     },
     {
-      "topic": "ground_flat_level_paved",
-      "description": "The parking surface is even and does not require significant leveling of the vehicle."
+      "topic": "terrain_level_flat",
+      "description": "The ground is even, requiring no ramps or leveling."
+    },
+    {
+      "topic": "surface_paved_paved",
+      "description": "The parking surface is asphalt, concrete, or solid paving (good for heavy vehicles)."
     },
     {
       "topic": "shade_natural_provided",
@@ -50,7 +62,7 @@
     },
     {
       "topic": "value_affordable_fair",
-      "description": "The cost of the stay is perceived as a good deal or reasonably priced."
+      "description": "The cost is perceived as a good deal or reasonably priced."
     },
     {
       "topic": "discounts_accepted_acsi",
@@ -58,7 +70,7 @@
     },
     {
       "topic": "pricing_transparent_simple",
-      "description": "Costs are clearly stated without hidden fees or complex calculations."
+      "description": "Costs are clearly stated without hidden fees."
     },
     {
       "topic": "location_beach_water_access",
@@ -66,7 +78,7 @@
     },
     {
       "topic": "location_town_center_proximity",
-      "description": "Walking or short distance to shops, restaurants, and town amenities."
+      "description": "Walking or short distance to shops and town amenities."
     },
     {
       "topic": "location_nature_trails_access",
@@ -74,15 +86,15 @@
     },
     {
       "topic": "supplies_nearby_shops_fuel",
-      "description": "Nearby availability of groceries, gas stations, or hardware stores."
+      "description": "Nearby availability of groceries or gas stations."
     },
     {
       "topic": "services_bread_delivery_onsite",
-      "description": "Fresh bread can be ordered or is delivered to the site in the morning."
+      "description": "Fresh bread can be ordered or is delivered onsite."
     },
     {
       "topic": "catering_bar_restaurant_onsite",
-      "description": "Availability of prepared food or drinks directly on the property."
+      "description": "Availability of prepared food or drinks directly on property."
     },
     {
       "topic": "utilities_reliable_electricity",
@@ -90,7 +102,7 @@
     },
     {
       "topic": "water_potable_easy_refill",
-      "description": "Clean drinking water is easily accessible for refilling tanks."
+      "description": "Clean drinking water is easily accessible for tanks."
     },
     {
       "topic": "waste_disposal_functional",
@@ -98,7 +110,7 @@
     },
     {
       "topic": "connectivity_strong_wifi",
-      "description": "The site provides a fast and stable wireless internet connection."
+      "description": "Site provides a fast and stable wireless internet connection."
     },
     {
       "topic": "connectivity_good_5g_mobile",
@@ -106,15 +118,15 @@
     },
     {
       "topic": "safety_secure_fenced_monitored",
-      "description": "Physical security measures like fences, gates, or cameras are present."
+      "description": "Physical security like fences, gates, or cameras."
     },
     {
       "topic": "safety_feeling_safe_community",
-      "description": "Subjective feeling of safety due to the neighborhood or other guests."
+      "description": "Subjective feeling of safety due to the neighborhood or guests."
     },
     {
       "topic": "pet_friendly_amenities",
-      "description": "The site welcomes dogs and may provide bins, showers, or exercise areas."
+      "description": "Site welcomes dogs and provides bins or exercise areas."
     },
     {
       "topic": "family_child_friendly_playground",
@@ -122,77 +134,69 @@
     },
     {
       "topic": "access_easy_large_vehicles",
-      "description": "The entrance and internal roads are suitable for long or heavy motorhomes."
+      "description": "Entrance and roads suitable for long or heavy motorhomes."
     },
     {
       "topic": "checkin_automated_flexible_process",
-      "description": "24/7 access via machines or easy self-check-in without waiting for staff."
+      "description": "24/7 access via machines or easy self-check-in."
     },
     {
       "topic": "activities_onsite_yoga_pool",
-      "description": "Recreational options like swimming pools or organized classes."
+      "description": "Recreational options like pools or organized classes."
     },
     {
-      "topic": "unique_vibe_creative_eco_farm",
-      "description": "The place has a distinct artistic, ecological, or rural character."
-    },
-    {
-      "topic": "utilities_lpg_gpl_specialist",
-      "description": "Availability of specialized gas refilling services on or near site."
+      "topic": "unique_vibe_creative_eco",
+      "description": "The place has a distinct artistic, ecological, or creative feeling."
     },
     {
       "topic": "activities_farm_eco_interaction",
-      "description": "Opportunities to interact with animals, gardens, or sustainable projects."
+      "description": "Active participation: milking animals, harvesting, or gardening."
+    },
+    {
+      "topic": "utilities_lpg_gpl_specialist",
+      "description": "Specialized gas refilling services on or near site."
     },
     {
       "topic": "heritage_culture_history",
-      "description": "The site is near historical monuments or has cultural significance."
+      "description": "Site is near historical monuments or cultural significance."
     },
     {
-      "topic": "rules_tolerated_unofficial",
-      "description": "Parking is not an official campsite, but authorities are known to overlook overnight stays without fines."
+      "topic": "status_tolerated_wildcamp",
+      "description": "Not an official campsite, but authorities are known to overlook stays without fines."
     },
     {
       "topic": "municipal_support_pro",
-      "description": "Explicit gratitude or positive mention of the local municipality for providing and supporting the area."
+      "description": "Explicit positive mention of the local town/mayor for providing the area."
     },
     {
       "topic": "utilities_at_each_pitch",
-      "description": "Essential utilities like water or electricity are available directly at the individual parking spot."
-    },
-    {
-      "topic": "environment_low_light_pollution",
-      "description": "Exceptional darkness at night, making the location ideal for stargazing."
+      "description": "Water or electricity are available directly at the individual spot."
     },
     {
       "topic": "local_product_purchase_opportunity",
-      "description": "Ability to buy local farm goods, wine, or crafts directly from the source."
-    },
-    {
-      "topic": "checkin_automated_multilingual",
-      "description": "Self-service kiosks support multiple languages, making check-in easier for international travelers."
+      "description": "Ability to buy farm goods, wine, or crafts from the source."
     },
     {
       "topic": "misc_other_pros",
-      "description": "Any other positive feedback that does not fit into specific categories."
+      "description": "Positive feedback that does not fit into specific categories."
     }
   ],
   "cons": [
     {
       "topic": "noise_traffic_airplane_loud",
-      "description": "Significant noise pollution from nearby roads, flight paths, or railways."
+      "description": "Pollution from roads, flight paths, or railways."
     },
     {
       "topic": "noise_dogs_animals_neighbors",
-      "description": "Disturbances from barking dogs, livestock, or loud neighbors."
+      "description": "Disturbances from barking, livestock, or loud neighbors."
     },
     {
       "topic": "noise_events_music_parties",
-      "description": "Loud music or late-night social gatherings that disrupt sleep."
+      "description": "Loud music or social gatherings disrupting sleep."
     },
     {
       "topic": "cleanliness_dirty_unkept",
-      "description": "General lack of maintenance, full bins, or unhygienic facilities."
+      "description": "Lack of maintenance, full bins, or unhygienic areas."
     },
     {
       "topic": "facilities_broken_outdated",
@@ -200,151 +204,148 @@
     },
     {
       "topic": "showers_cold_low_pressure",
-      "description": "Water is uncomfortably cold or the flow is too weak to use effectively."
+      "description": "Water is uncomfortably cold or flow is too weak."
     },
     {
       "topic": "terrain_uneven_sloping",
-      "description": "Ground is not level, requiring ramps or causing discomfort."
+      "description": "Ground is not level, requiring ramps for the vehicle."
     },
     {
       "topic": "terrain_muddy_dusty_flooding",
-      "description": "Ground surface becomes difficult to manage in rain or dry weather."
+      "description": "Surface becomes difficult to manage in rain or extreme dry."
     },
     {
       "topic": "shade_lack_of_exposed",
-      "description": "The area is completely open to the sun, leading to excessive heat."
+      "description": "Area is open to the sun, leading to excessive heat."
+    },
+    {
+      "topic": "shade_excessive_solar_blocking",
+      "description": "Too many trees/branches blocking solar panels or satellite internet (Starlink)."
     },
     {
       "topic": "access_difficult_narrow_steep",
-      "description": "The road to the site is challenging for driving, especially for larger vans."
-    },
-    {
-      "topic": "maneuvering_tight_spaces_restrictions",
-      "description": "The site layout makes it hard to turn or position the vehicle."
-    },
-    {
-      "topic": "overcrowding_packed_residents",
-      "description": "The site feels too full, with vehicles parked very close together."
-    },
-    {
-      "topic": "space_cramped_lack_of_privacy",
-      "description": "Pitches are small or there is no screening between neighbors."
-    },
-    {
-      "topic": "price_expensive_overpriced",
-      "description": "The cost is higher than expected for the quality of services provided."
-    },
-    {
-      "topic": "payment_issues_cash_only_friction",
-      "description": "Inconvenience caused by not accepting cards or having complex payment rules."
-    },
-    {
-      "topic": "service_lack_of_amenities",
-      "description": "Missing basic services such as toilets, water, or waste points."
-    },
-    {
-      "topic": "service_staff_rude_unfriendly",
-      "description": "Negative interactions with personnel that affect the experience."
-    },
-    {
-      "topic": "checkin_rules_restrictive_slow",
-      "description": "Long waits for check-in or restrictive opening hours for the office."
-    },
-    {
-      "topic": "wifi_poor_unreliable_signal",
-      "description": "The provided internet is slow, cuts out, or is only available in small areas."
-    },
-    {
-      "topic": "mobile_signal_weak_dead_zone",
-      "description": "Poor or non-existent cellular reception on the site."
-    },
-    {
-      "topic": "safety_theft_risk_loitering",
-      "description": "Presence of suspicious individuals or known history of break-ins."
-    },
-    {
-      "topic": "safety_police_fines_eviction_risk",
-      "description": "Risk of being moved on or fined by local authorities for parking."
-    },
-    {
-      "topic": "environment_pests_insects_smells",
-      "description": "Problems with mosquitoes, flies, or unpleasant odors from nearby industry/waste."
-    },
-    {
-      "topic": "environment_litter_trash_accumulation",
-      "description": "Noticeable rubbish left on the ground or overflowing bins."
-    },
-    {
-      "topic": "utilities_electricity_tripping",
-      "description": "Power hookups frequently fail or cannot handle high-draw appliances."
-    },
-    {
-      "topic": "utilities_water_nonpotable_slow",
-      "description": "Water is not safe to drink or takes a very long time to fill a tank."
-    },
-    {
-      "topic": "signage_unclear_directions",
-      "description": "Hard to find the entrance or specific spots due to lack of signs."
-    },
-    {
-      "topic": "location_remote_isolated_far",
-      "description": "Far from any infrastructure, requiring significant driving for basic needs."
-    },
-    {
-      "topic": "rules_strict_fussy_unpleasant",
-      "description": "Excessive or unwelcoming rules regarding behavior or site use."
-    },
-    {
-      "topic": "environment_radiation_emf",
-      "description": "Concerns about proximity to power lines, antennas, or cell towers."
-    },
-    {
-      "topic": "social_niche_demographic",
-      "description": "The site is dominated by a specific social group that may make others feel unwelcome."
-    },
-    {
-      "topic": "situational_temporary_blockage",
-      "description": "Access is blocked due to roadworks, events, or seasonal closures."
-    },
-    {
-      "topic": "waste_disposal_no_grey_water",
-      "description": "Facilities exist for chemical toilets but not for draining grey water tanks."
-    },
-    {
-      "topic": "utilities_adapter_required",
-      "description": "Requires specific, non-standard connectors for water or electricity that guests might not have."
-    },
-    {
-      "topic": "waste_disposal_poor_design",
-      "description": "Waste stations are hygienic, difficult to access, or located too close to living areas."
-    },
-    {
-      "topic": "social_inconsiderate_behavior",
-      "description": "Other guests disrupt the experience by parking badly, being loud, or overstaying."
+      "description": "The road to the site is challenging for driving."
     },
     {
       "topic": "access_overhead_clearance",
-      "description": "Physical height barriers such as low-hanging tree branches, arches, or height-restriction gates."
+      "description": "Physical height barriers like low tree branches, arches, or gates."
+    },
+    {
+      "topic": "maneuvering_tight_spaces_restrictions",
+      "description": "Layout makes it hard to turn or position the vehicle."
+    },
+    {
+      "topic": "overcrowding_situational_busy",
+      "description": "Situational issue: too many people/vehicles present right now."
+    },
+    {
+      "topic": "space_cramped_design_issue",
+      "description": "Design issue: the pitches are physically too small or narrow."
+    },
+    {
+      "topic": "price_expensive_overpriced",
+      "description": "The cost is higher than expected for the quality."
+    },
+    {
+      "topic": "payment_issues_cash_only_friction",
+      "description": "Inconvenience of no cards or complex payment rules."
+    },
+    {
+      "topic": "service_lack_of_amenities",
+      "description": "Missing basic services like toilets or water."
+    },
+    {
+      "topic": "service_staff_rude_unfriendly",
+      "description": "Negative interaction with personnel."
+    },
+    {
+      "topic": "checkin_rules_restrictive_slow",
+      "description": "Restrictive hours or complex arrival rules (e.g. arrive after 6PM only)."
+    },
+    {
+      "topic": "wifi_poor_unreliable_signal",
+      "description": "Internet provided by the site is slow or cuts out."
+    },
+    {
+      "topic": "mobile_signal_weak_dead_zone",
+      "description": "Poor cellular reception (dead zones) on site."
+    },
+    {
+      "topic": "safety_theft_risk_loitering",
+      "description": "Suspicious individuals or known history of break-ins."
+    },
+    {
+      "topic": "safety_police_fines_eviction_risk",
+      "description": "Risk of being moved on or fined by local police."
+    },
+    {
+      "topic": "environment_pests_insects_smells",
+      "description": "Problems with mosquitoes, flies, or industry odors."
+    },
+    {
+      "topic": "environment_litter_trash_accumulation",
+      "description": "Rubbish left on ground or overflowing bins."
+    },
+    {
+      "topic": "utilities_electricity_tripping",
+      "description": "Power hookups frequently fail/cannot handle appliances."
+    },
+    {
+      "topic": "utilities_water_nonpotable_slow",
+      "description": "Water is unsafe to drink or refill is extremely slow."
+    },
+    {
+      "topic": "signage_unclear_directions",
+      "description": "Hard to find entrance/spots due to lack of signs."
+    },
+    {
+      "topic": "location_remote_isolated_far",
+      "description": "Far from infrastructure, requiring significant driving for needs."
+    },
+    {
+      "topic": "rules_strict_fussy_unpleasant",
+      "description": "Excessive rules regarding behavior or stay duration (e.g. max 24h)."
+    },
+    {
+      "topic": "environment_radiation_emf",
+      "description": "Proximity to power lines, antennas, or towers."
+    },
+    {
+      "topic": "social_exclusionary_cliquey",
+      "description": "Behavior from locals or long-term residents that makes others feel unwelcome."
+    },
+    {
+      "topic": "situational_temporary_blockage",
+      "description": "Access blocked by roadworks, events, or season closure."
+    },
+    {
+      "topic": "waste_disposal_no_grey_water",
+      "description": "Chemical toilet emptying exists, but no grey water drainage."
+    },
+    {
+      "topic": "utilities_adapter_required",
+      "description": "Requires non-standard connectors for water or power."
+    },
+    {
+      "topic": "waste_disposal_poor_design",
+      "description": "Waste stations are unhygienic, hard to access, or poorly located."
+    },
+    {
+      "topic": "social_inconsiderate_behavior",
+      "description": "Other campers Disrupting the experience (generators, bad parking)."
     },
     {
       "topic": "parking_unsuitable_large_rvs",
-      "description": "Parking spaces are physically too small or narrow for standard motorhomes."
+      "description": "Spots physically too short or narrow for motorhomes."
     },
     {
       "topic": "terrain_sandy_stuck_risk",
-      "description": "Ground surface is loose sand, creating a high risk of vehicles getting stuck."
+      "description": "Surface is loose sand; high risk of sinking/getting stuck."
     },
     {
       "topic": "weather_wind_exposure",
-      "description": "The site is extremely exposed to wind, making it uncomfortable or unsafe for awnings/roof tents."
+      "description": "Exposed to high wind; unsafe for awnings or roof tents."
     },
     {
       "topic": "noise_natural_elements",
-      "description": "Natural sounds (loud waves, intense wind) that are loud enough to disrupt sleep."
-    },
-    {
-      "topic": "misc_other_cons",
-      "description": "Any other negative feedback that does not fit into specific categories."
-    }
-  ]
-}
+      "description": "Natural sounds (waves, intense wind) loud enough to disrupt sleep."
