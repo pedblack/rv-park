@@ -25,11 +25,21 @@ def ts_print(msg):
 def load_current_taxonomy():
     """Reads the current taxonomy from the JSON file and formats it for the AI."""
     if os.path.exists(TAXONOMY_FILE):
-        with open(TAXONOMY_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            pro_keys = ", ".join(data.get("pros", []))
-            con_keys = ", ".join(data.get("cons", []))
-            return f"PRO_KEYS: {pro_keys}\nCON_KEYS: {con_keys}"
+        try:
+            with open(TAXONOMY_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                
+                # Extract the "topic" value from each object in the pros and cons lists
+                pro_keys = [item["topic"] for item in data.get("pros", []) if isinstance(item, dict)]
+                con_keys = [item["topic"] for item in data.get("cons", []) if isinstance(item, dict)]
+                
+                pro_keys_str = ", ".join(pro_keys)
+                con_keys_str = ", ".join(con_keys)
+                
+                return f"PRO_KEYS: {pro_keys_str}\nCON_KEYS: {con_keys_str}"
+        except Exception as e:
+            return f"Error loading taxonomy: {e}"
+            
     return "No current taxonomy found."
 
 class TaxonomyDiscoverer:
