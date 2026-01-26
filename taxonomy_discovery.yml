@@ -1,0 +1,32 @@
+name: Taxonomy Discovery
+
+on:
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install google-genai playwright playwright-stealth pandas
+          playwright install chromium
+
+      - name: Run Discovery Script
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        run: python taxonomy_discovery.py
+
+      - name: Upload Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: taxonomy-report
+          path: taxonomy_discovery_report.json
