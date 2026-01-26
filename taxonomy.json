@@ -37,6 +37,12 @@
     "utilities_lpg_gpl_specialist",
     "activities_farm_eco_interaction",
     "heritage_culture_history",
+    "rules_tolerated_unofficial",
+    "municipal_support_pro",
+    "utilities_at_each_pitch",
+    "environment_low_light_pollution",
+    "local_product_purchase_opportunity",
+    "checkin_automated_multilingual",
     "misc_other_pros"
   ],
   "cons": [
@@ -72,6 +78,15 @@
     "environment_radiation_emf",
     "social_niche_demographic",
     "situational_temporary_blockage",
+    "waste_disposal_no_grey_water",
+    "utilities_adapter_required",
+    "waste_disposal_poor_design",
+    "social_inconsiderate_behavior",
+    "access_overhead_clearance",
+    "parking_unsuitable_large_rvs",
+    "terrain_sandy_stuck_risk",
+    "weather_wind_exposure",
+    "noise_natural_elements",
     "misc_other_cons"
   ]
 }
