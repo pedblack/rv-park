@@ -168,8 +168,12 @@ class P4NScraper:
         try:
             with open(TAXONOMY_FILE, "r", encoding="utf-8") as f:
                 tax_data = json.load(f)
-                pro_keys_str = ", ".join(tax_data.get("pros", []))
-                con_keys_str = ", ".join(tax_data.get("cons", []))
+                # Extract the "topic" value from each object in the pros and cons lists
+                pro_keys = [item["topic"] for item in tax_data.get("pros", []) if isinstance(item, dict)]
+                con_keys = [item["topic"] for item in tax_data.get("cons", []) if isinstance(item, dict)]
+                
+                pro_keys_str = ", ".join(pro_keys)
+                con_keys_str = ", ".join(con_keys)
         except Exception as e:
             ts_print(f"❌ FAILED TO LOAD TAXONOMY: {e}")
             return {}
