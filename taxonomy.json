@@ -199,7 +199,13 @@
     {
       "topic": "impact_tree_planting_donation",
       "description": "Stay fee includes an ecological contribution, such as planting a tree."
+    },
+    {
+      "topic": "misc_general_positive_sentiment",
+      "description": "General praise without specific details, e.g., \"Great stay,\" \"Lovely spot,\" \"We will be back.\""
     }
+    Pros: "" (Description: )
+
   ],
   "cons": [
     {
@@ -401,6 +407,10 @@
     {
       "topic": "access_app_booking_mandatory",
       "description": "Entry is barred by a gate that requires downloading a specific app to book and open."
+    },
+    {
+      "topic": "misc_general_negative_sentiment",
+      "description": "General complaints without specific details, e.g., \"Terrible\" or \"Not recommended\""
     }
   ]
 }
