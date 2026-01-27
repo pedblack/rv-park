@@ -226,7 +226,7 @@ class P4NScraper:
 
         config = types.GenerateContentConfig(
             response_mime_type="application/json",
-            temperature=0.1,
+            temperature=0.0,
             system_instruction=system_instruction,
         )
 
