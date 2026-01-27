@@ -11,7 +11,7 @@ on:
       batch_size:
         description: 'Batch size (0 for single call)'
         required: true
-        default: '10'
+        default: '0'
         type: string
       model:
         description: 'Model Selection'
