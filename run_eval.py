@@ -3,6 +3,7 @@ import json
 import os
 import asyncio
 import re
+import sys  # <--- Added to force failure
 from typing import List, Dict, Set
 from google import genai
 from google.genai import types
@@ -20,7 +21,8 @@ MODELS = {
 
 def load_data(limit: int = 0):
     if not os.path.exists(EVAL_SET_FILE):
-        raise FileNotFoundError(f"❌ Could not find {EVAL_SET_FILE}")
+        print(f"❌ Critical: {EVAL_SET_FILE} not found.")
+        sys.exit(1)
     with open(EVAL_SET_FILE, "r", encoding="utf-8") as f:
         data = json.load(f)
     if limit > 0:
@@ -29,16 +31,15 @@ def load_data(limit: int = 0):
 
 def load_prompt():
     if not os.path.exists(PROMPT_FILE):
-        raise FileNotFoundError(f"❌ Could not find {PROMPT_FILE}")
+        print(f"❌ Critical: {PROMPT_FILE} not found.")
+        sys.exit(1)
     with open(PROMPT_FILE, "r", encoding="utf-8") as f:
-        # We assume the prompt file is already formatted or handles placeholders dynamically
-        # If your prompt has python format placeholders like {pro_taxonomy_block}, 
-        # you might need to fill them here using taxonomy.json, similar to the scraper.
-        # For simplicity, assuming prompt file is ready or we load taxonomy here.
         content = f.read()
-        
-        # Check if we need to inject taxonomy (Crucial step if using placeholders)
+        # Handle taxonomy injection if present
         if "{pro_taxonomy_block}" in content:
+            if not os.path.exists("taxonomy.json"):
+                 print("❌ Critical: taxonomy.json needed for prompt but not found.")
+                 sys.exit(1)
             with open("taxonomy.json", "r") as tf:
                 tax = json.load(tf)
                 pro_list = [f"- {item['topic']}: {item['description']}" for item in tax.get("pros", [])]
@@ -56,13 +57,11 @@ def calculate_metrics(gold_set: Set[str], pred_set: Set[str]):
     return tp, fp, fn
 
 def extract_json_content(text):
-    """Robust extraction removing markdown code blocks."""
     text = re.sub(r"```json\s*", "", text, flags=re.IGNORECASE)
     text = re.sub(r"```\s*", "", text)
     return text.strip()
 
 async def process_batch(client, model_name, system_instruction, batch_reviews, start_index):
-    """Sends a single batch to the LLM and handles wrapped responses."""
     config = types.GenerateContentConfig(
         response_mime_type="application/json",
         temperature=0.0,
@@ -70,7 +69,6 @@ async def process_batch(client, model_name, system_instruction, batch_reviews, s
     )
 
     try:
-        # Send ONLY the list of strings, matching the prompt expectation
         response = await client.aio.models.generate_content(
             model=model_name,
             contents=f"ANALYZE REVIEWS:\n{json.dumps(batch_reviews)}",
@@ -83,36 +81,33 @@ async def process_batch(client, model_name, system_instruction, batch_reviews, s
             parsed = json.loads(raw_text)
         except json.JSONDecodeError:
             print(f"   ⚠️ JSON Decode Error in batch {start_index}. Response preview: {raw_text[:100]}...")
-            return []
+            return None # Return None to signal error
 
-        # --- SMART UNWRAPPER ---
         if isinstance(parsed, list):
             return parsed
         
         if isinstance(parsed, dict):
-            # Check common keys if LLM wrapped the list
             for key in ["reviews", "data", "results", "output", "items", "analysis"]:
                 if key in parsed and isinstance(parsed[key], list):
                     return parsed[key]
             
-            # If strictly one key exists and it's a list
             if len(parsed) == 1:
                 key = list(parsed.keys())[0]
                 if isinstance(parsed[key], list):
                     return parsed[key]
 
             print(f"   ⚠️ Parsed JSON is a dict but couldn't find the list. Keys: {list(parsed.keys())}")
-            return []
+            return None # Return None to signal error
 
-        return []
+        return None
 
     except Exception as e:
         print(f"   ⚠️ API/Network Error in batch {start_index}: {str(e)}")
-        return []
+        return None # Return None to signal error
 
 async def run_evaluation(model_key: str, limit: int, batch_size: int):
     client = genai.Client(api_key=API_KEY)
-    model_name = MODELS.get(model_key, model_key) # Fallback to key if not found
+    model_name = MODELS.get(model_key, model_key)
     
     print(f"🚀 Loading Data...")
     gold_data = load_data(limit)
@@ -120,15 +115,11 @@ async def run_evaluation(model_key: str, limit: int, batch_size: int):
     print(f"   Loaded {total_items} items to evaluate.")
 
     print(f"📜 Loading Prompt...")
-    try:
-        system_instruction = load_prompt()
-    except Exception as e:
-        print(f"❌ Error loading prompt/taxonomy: {e}")
-        return
+    system_instruction = load_prompt()
 
     predictions = []
+    errors_occurred = False # <--- Error Flag
     
-    # Determine effective batch size
     effective_batch_size = total_items if batch_size <= 0 else batch_size
     
     print(f"🤖 Sending requests to {model_name}...")
@@ -137,7 +128,6 @@ async def run_evaluation(model_key: str, limit: int, batch_size: int):
     else:
         print(f"   Mode: BATCHED (Batch size: {effective_batch_size})")
 
-    # --- PROCESSING LOOP ---
     for i in range(0, total_items, effective_batch_size):
         batch_gold = gold_data[i : i + effective_batch_size]
         batch_reviews = [item["review"] for item in batch_gold]
@@ -147,14 +137,13 @@ async def run_evaluation(model_key: str, limit: int, batch_size: int):
         
         batch_preds = await process_batch(client, model_name, system_instruction, batch_reviews, i)
         
-        if batch_preds:
-            # Append predictions. We assume strict ordering.
-            # If the batch size matches, great. If not, we might have misalignment.
-            # (Advanced implementations map by review text, but simple sequential is usually fine for batch=10)
+        if batch_preds is not None:
             predictions.extend(batch_preds)
         else:
-            print(f"   ❌ Batch {current_batch_num} failed or returned empty.")
-            # Pad with empty dicts to maintain index alignment for subsequent batches
+            print(f"   ❌ Batch {current_batch_num} FAILED.")
+            errors_occurred = True # Mark failure
+            # Pad with empty dicts so we can still calculate partial metrics if we wanted, 
+            # but we will exit with error code at the end.
             predictions.extend([{} for _ in batch_reviews])
 
     # --- SCORING ---
@@ -168,7 +157,6 @@ async def run_evaluation(model_key: str, limit: int, batch_size: int):
         
         if i < len(predictions):
             pred_item = predictions[i]
-            # Handle potential mismatched structure
             if isinstance(pred_item, dict):
                 pred_pros = set(pred_item.get("pros", []))
                 pred_cons = set(pred_item.get("cons", []))
@@ -201,6 +189,11 @@ async def run_evaluation(model_key: str, limit: int, batch_size: int):
     print("-" * 40)
     print(f"Raw Counts -> TP: {total_tp}, FP: {total_fp}, FN: {total_fn}")
     print("="*40)
+
+    # FINAL FAILURE CHECK
+    if errors_occurred:
+        print("\n❌ FAILED: One or more batches encountered API/Parsing errors.")
+        sys.exit(1) # <--- Forces GitHub Action to turn RED
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
