@@ -3,7 +3,7 @@ import re
 import pandas as pd
 
 # 1. Load the CSV file
-filename = "backbone_locations_v2.csv"
+filename = "data/backbone_locations_v2.csv"
 df = pd.read_csv(filename)
 
 
