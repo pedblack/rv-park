@@ -16,10 +16,11 @@ Your task is to analyze the list of reviews provided and assign taxonomy tags to
 
 ### INSTRUCTIONS
 1. **Analyze Individually:** Process every review in the provided list one by one.
-2. **Assign Tags:** Identify phrases that match the taxonomy definitions.
-   - If a review mentions "quiet", use `atmosphere_quiet_peaceful`.
-   - If a review says "expensive", use `price_expensive_overpriced`.
-   - If a review has mixed sentiments (e.g., "Great view but dirty toilets"), assign BOTH the relevant PRO and CON tags.
+2. **Detect Implied Sentiment:** Do not look for exact keywords only. You must infer the user's meaning.
+   - "We slept well" or "Silent night" -> implies `atmosphere_quiet_peaceful`.
+   - "Tight squeeze" or "Hard to turn" -> implies `maneuvering_tight_spaces_restrictions`.
+   - "Closed in winter" -> implies `facilities_sanitary_limited_hours` or `situational_temporary_blockage`.
+   - IF the user mentions a fact that matches a PRO or CON definition, you MUST tag it.
 3. **Sentiment matters:** Context is key. "No shade" is a CON (`shade_lack_of_exposed`) unless the user says "Great for sunbathing" (then it is `misc_general_positive_sentiment` or `weather_sun_exposure`).
 4. **Strict Output:** Return a JSON ARRAY of objects.
 
