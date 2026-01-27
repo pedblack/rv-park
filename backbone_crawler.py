@@ -5,6 +5,7 @@ import os
 import random
 import re
 import time
+from collections import Counter  # <--- Added for aggregation
 from datetime import datetime, timedelta
 
 import pandas as pd
@@ -220,11 +221,15 @@ class P4NScraper:
             ts_print(f"❌ FAILED TO LOAD TAXONOMY OR PROMPT: {e}")
             return {}
 
-        num_reviews = len(raw_data.get("all_reviews", []))
-        json_payload = json.dumps(raw_data, default=str, ensure_ascii=False)
+        # --- MODIFIED: Prepare only the reviews list for granular analysis ---
+        reviews_list = raw_data.get("all_reviews", [])
+        if not reviews_list:
+            return {}
+
+        json_payload = json.dumps(reviews_list, default=str, ensure_ascii=False)
 
         PipelineLogger.log_event(
-            "SENT_TO_GEMINI", {"payload": raw_data, "model": model_name}
+            "SENT_TO_GEMINI", {"payload_size": len(reviews_list), "model": model_name}
         )
 
         config = types.GenerateContentConfig(
@@ -239,18 +244,64 @@ class P4NScraper:
 
                 response = await client.aio.models.generate_content(
                     model=model_name,
-                    contents=f"ANALYZE:\n{json_payload}",
+                    contents=f"ANALYZE REVIEWS:\n{json_payload}",
                     config=config,
                 )
 
                 # Attempt to parse JSON immediately inside the try block
                 clean_text = re.sub(r"```json\s*|\s*```", "", response.text).strip()
-                ai_json = json.loads(clean_text)
+                ai_response_list = json.loads(clean_text)
 
-                PipelineLogger.log_event(
-                    "GEMINI_ANSWER", {"model": model_name, "response": ai_json}
-                )
-                return ai_json
+                # --- NEW LOGIC: Map-Reduce Aggregation ---
+                # 1. Unwrap if wrapped in a dict key (defensive)
+                if isinstance(ai_response_list, dict):
+                    for k in ["reviews", "data", "results", "output"]:
+                        if k in ai_response_list and isinstance(
+                            ai_response_list[k], list
+                        ):
+                            ai_response_list = ai_response_list[k]
+                            break
+
+                # 2. Python Aggregation
+                if isinstance(ai_response_list, list):
+                    aggregated_pros = Counter()
+                    aggregated_cons = Counter()
+
+                    for item in ai_response_list:
+                        if isinstance(item, dict):
+                            for p in item.get("pros", []):
+                                aggregated_pros[p] += 1
+                            for c in item.get("cons", []):
+                                aggregated_cons[c] += 1
+
+                    # 3. Construct result matching old schema for compatibility
+                    aggregated_json = {
+                        "num_places": raw_data.get("places_count"),  # Use scraper data
+                        "parking_min": None,
+                        "parking_max": None,
+                        "electricity_eur": None,
+                        "top_languages": [],
+                        "pros_cons": {
+                            "pros": [
+                                {"topic": k, "count": v}
+                                for k, v in aggregated_pros.items()
+                            ],
+                            "cons": [
+                                {"topic": k, "count": v}
+                                for k, v in aggregated_cons.items()
+                            ],
+                        },
+                    }
+
+                    PipelineLogger.log_event(
+                        "GEMINI_ANSWER",
+                        {"model": model_name, "response": aggregated_json},
+                    )
+                    return aggregated_json
+                else:
+                    # Fallback if list not found
+                    ts_print(f"⚠️ Unexpected JSON structure from AI for {url}")
+                    return {}
 
             except (json.JSONDecodeError, Exception) as e:
                 # Force retry for JSON errors OR transient API errors

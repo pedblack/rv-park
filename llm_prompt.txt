@@ -1,30 +1,52 @@
-Analyze the provided property data and reviews. You MUST identify recurring themes and count their occurrences across all reviews. Return JSON ONLY. Use snake_case.
+You are an expert data labeler for user reviews of camping locations. 
+Your task is to analyze the list of reviews provided and assign taxonomy tags to EACH review individually.
 
-### TAXONOMY DEFINITIONS (Use ONLY the keys listed below) ###
-
-PRO_KEYS:
+### TAXONOMY DEFINITIONS
+**PROS:**
 {pro_taxonomy_block}
 
-CON_KEYS:
+**CONS:**
 {con_taxonomy_block}
 
-### JSON SCHEMA ###
-{{
-    "num_places": int,
-    "parking_min": float,
-    "parking_max": float,
-    "electricity_eur": float,
-    "top_languages": [ {{"lang": "string", "count": int}} ],
-    "pros_cons": {{
-        "pros": [ {{"topic": "string", "count": int}} ],
-        "cons": [ {{"topic": "string", "count": int}} ]
-    }}
-}}
+### NEGATIVE CONSTRAINTS (DO NOT TAG IF...)
+- Do NOT tag "shade_lack_of_exposed" if the user implies it is positive (e.g., "Good for solar").
+- Do NOT tag "location_remote_isolated_far" if the user implies it is positive (e.g., "Secluded and private").
+- Do NOT tag "price_expensive_overpriced" just because a price is mentioned. Only use it if they complain about the value.
+- Do NOT hallucinate tags. You must use the EXACT strings provided in the taxonomy.
 
-### INSTRUCTIONS ###
-1. num_places: Extract from 'places_count' field. Use null if not found.
-2. Pricing: Extract min/max range. If electricity is included in parking fee, set electricity_eur to 0.0.
-3. Themes: Map review comments to the closest matching key in the TAXONOMY.
-4. Handling Misc: If a review point does not fit any specific category, map it to 'misc_other_pros' or 'misc_other_cons' accordingly. Do not ignore any feedback.
-5. Constraint: The "topic" field MUST be a verbatim string from the PRO_KEYS or CON_KEYS lists. Do not create your own keys.
-6. Output: Return ONLY the raw JSON object. No preamble, no markdown backticks.
+### INSTRUCTIONS
+1. **Analyze Individually:** Process every review in the provided list one by one.
+2. **Assign Tags:** Identify phrases that match the taxonomy definitions.
+   - If a review mentions "quiet", use `atmosphere_quiet_peaceful`.
+   - If a review says "expensive", use `price_expensive_overpriced`.
+   - If a review has mixed sentiments (e.g., "Great view but dirty toilets"), assign BOTH the relevant PRO and CON tags.
+3. **Sentiment matters:** Context is key. "No shade" is a CON (`shade_lack_of_exposed`) unless the user says "Great for sunbathing" (then it is `misc_general_positive_sentiment` or `weather_sun_exposure`).
+4. **Strict Output:** Return a JSON ARRAY of objects.
+
+### FEW-SHOT EXAMPLES
+User: "Beautiful view of the lake, but the road down was a nightmare for our 7m van."
+Assistant: [{{
+    "review": "Beautiful view of the lake, but the road down was a nightmare for our 7m van.",
+    "pros": ["scenery_natural_beauty", "location_beach_water_access"],
+    "cons": ["access_difficult_narrow_steep"]
+}}]
+
+User: "Simple parking. 10 euro. We felt safe."
+Assistant: [{{
+    "review": "Simple parking. 10 euro. We felt safe.",
+    "pros": ["safety_feeling_safe_community"],
+    "cons": []
+}}]
+
+### INPUT DATA
+The input is a JSON list of strings (reviews).
+
+### OUTPUT SCHEMA
+Return a JSON ARRAY.
+[
+    {{
+        "review": "The original review text string",
+        "pros": ["exact_tag_string_1", "exact_tag_string_2"],
+        "cons": ["exact_tag_string_3"]
+    }}
+]
