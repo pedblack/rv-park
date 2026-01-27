@@ -35,6 +35,7 @@ def load_prompt():
         sys.exit(1)
     with open(PROMPT_FILE, "r", encoding="utf-8") as f:
         content = f.read()
+        
         # Handle taxonomy injection if present
         if "{pro_taxonomy_block}" in content:
             if not os.path.exists("taxonomy.json"):
@@ -44,10 +45,12 @@ def load_prompt():
                 tax = json.load(tf)
                 pro_list = [f"- {item['topic']}: {item['description']}" for item in tax.get("pros", [])]
                 con_list = [f"- {item['topic']}: {item['description']}" for item in tax.get("cons", [])]
-                content = content.format(
-                    pro_taxonomy_block="\n".join(pro_list),
-                    con_taxonomy_block="\n".join(con_list)
-                )
+                
+                # Use .replace() instead of .format(). 
+                # This ignores the JSON curly braces in your prompt so they don't cause errors.
+                content = content.replace("{pro_taxonomy_block}", "\n".join(pro_list))
+                content = content.replace("{con_taxonomy_block}", "\n".join(con_list))
+                
         return content
 
 def calculate_metrics(gold_set: Set[str], pred_set: Set[str]):
