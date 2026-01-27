@@ -9,22 +9,17 @@ Your task is to analyze the list of reviews provided and assign taxonomy tags to
 {con_taxonomy_block}
 
 ### CRITICAL RULES
-
 1. **Implicit Sentiment:** You MUST detect implied meaning.
-   - "We slept well" or "Silent night" -> `atmosphere_quiet_peaceful`.
-   - "Hard to park" -> `maneuvering_tight_spaces_restrictions`.
-   - "Closed in winter" -> `facilities_sanitary_limited_hours`.
+   - "We slept well" implies `atmosphere_quiet_peaceful`.
+   - "Hard to park" implies `maneuvering_tight_spaces_restrictions`.
+   - "Closed in winter" implies `facilities_sanitary_limited_hours`.
 
-2. **Keyword Mapping (CRITICAL):**
-   - "Services," "Vidange," "Load/Unload," "Aire de service" -> ALWAYS tag `waste_disposal_functional`.
-   - "Intermarche," "Lidl," "Supermarket," "Commerces" -> ALWAYS tag `supplies_nearby_shops_fuel`.
-   - "Nice spot," "Lovely," "Recommanded," "Obrigado" -> ALWAYS tag `misc_general_positive_sentiment`.
+2. **Strict Threshold:** Do NOT tag if the connection is weak or ambiguous.
+   - User: "There is a road nearby." -> Do NOT tag `noise_traffic_airplane_loud` unless they say it was loud/disturbing.
+   - User: "Paid 10 euros." -> Do NOT tag `value_affordable_fair` or `price_expensive_overpriced` unless they explicitly comment on the value.
+   - User: "Trees around." -> Do NOT tag `shade_natural_provided` unless they mention shade/sun protection.
 
-3. **Location Constraints:**
-   - If a facility (like laundry or showers) is described as being "at the supermarket" or "in town", do NOT tag it as an onsite facility (like `laundry_effective_available`). Use `supplies_nearby_shops_fuel` or `location_town_center_proximity` instead.
-
-4. **Electricity:**
-   - If the user mentions a price for electricity (e.g., "Electricity 3€"), implies it IS available. Tag `utilities_reliable_electricity`.
+3. **Double Tagging:** A single phrase can trigger multiple tags. "Great view but the road was steep" -> `scenery_natural_beauty` AND `access_difficult_narrow_steep`.
 
 ### INPUT DATA
 The input is a JSON list of strings (reviews).
@@ -34,7 +29,7 @@ Return a JSON ARRAY of objects.
 [
     {
         "review": "The original review text",
-        "reasoning": "Step 1: Translate non-English key terms. Step 2: List found amenities (e.g. 'Intermarche' -> Shops). Step 3: Determine sentiment.",
+        "reasoning": "Briefly explain WHY you selected these tags based on specific phrases.",
         "pros": ["tag_1", "tag_2"],
         "cons": ["tag_3"]
     }
