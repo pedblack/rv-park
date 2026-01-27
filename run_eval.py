@@ -3,7 +3,7 @@ import json
 import os
 import asyncio
 import re
-import sys  # <--- Added to force failure
+import sys
 from typing import List, Dict, Set
 from google import genai
 from google.genai import types
@@ -35,7 +35,6 @@ def load_prompt():
         sys.exit(1)
     with open(PROMPT_FILE, "r", encoding="utf-8") as f:
         content = f.read()
-        
         # Handle taxonomy injection if present
         if "{pro_taxonomy_block}" in content:
             if not os.path.exists("taxonomy.json"):
@@ -45,19 +44,15 @@ def load_prompt():
                 tax = json.load(tf)
                 pro_list = [f"- {item['topic']}: {item['description']}" for item in tax.get("pros", [])]
                 con_list = [f"- {item['topic']}: {item['description']}" for item in tax.get("cons", [])]
-                
-                # Use .replace() instead of .format(). 
-                # This ignores the JSON curly braces in your prompt so they don't cause errors.
                 content = content.replace("{pro_taxonomy_block}", "\n".join(pro_list))
                 content = content.replace("{con_taxonomy_block}", "\n".join(con_list))
-                
         return content
 
 def calculate_metrics(gold_set: Set[str], pred_set: Set[str]):
     tp = len(gold_set.intersection(pred_set))
-    fp = len(pred_set - gold_set)
-    fn = len(gold_set - pred_set)
-    return tp, fp, fn
+    fp_set = pred_set - gold_set
+    fn_set = gold_set - pred_set
+    return len(gold_set.intersection(pred_set)), len(fp_set), len(fn_set), fp_set, fn_set
 
 def extract_json_content(text):
     text = re.sub(r"```json\s*", "", text, flags=re.IGNORECASE)
@@ -84,7 +79,7 @@ async def process_batch(client, model_name, system_instruction, batch_reviews, s
             parsed = json.loads(raw_text)
         except json.JSONDecodeError:
             print(f"   ⚠️ JSON Decode Error in batch {start_index}. Response preview: {raw_text[:100]}...")
-            return None # Return None to signal error
+            return None 
 
         if isinstance(parsed, list):
             return parsed
@@ -100,13 +95,13 @@ async def process_batch(client, model_name, system_instruction, batch_reviews, s
                     return parsed[key]
 
             print(f"   ⚠️ Parsed JSON is a dict but couldn't find the list. Keys: {list(parsed.keys())}")
-            return None # Return None to signal error
+            return None
 
         return None
 
     except Exception as e:
         print(f"   ⚠️ API/Network Error in batch {start_index}: {str(e)}")
-        return None # Return None to signal error
+        return None
 
 async def run_evaluation(model_key: str, limit: int, batch_size: int):
     client = genai.Client(api_key=API_KEY)
@@ -121,7 +116,7 @@ async def run_evaluation(model_key: str, limit: int, batch_size: int):
     system_instruction = load_prompt()
 
     predictions = []
-    errors_occurred = False # <--- Error Flag
+    errors_occurred = False
     
     effective_batch_size = total_items if batch_size <= 0 else batch_size
     
@@ -144,16 +139,15 @@ async def run_evaluation(model_key: str, limit: int, batch_size: int):
             predictions.extend(batch_preds)
         else:
             print(f"   ❌ Batch {current_batch_num} FAILED.")
-            errors_occurred = True # Mark failure
-            # Pad with empty dicts so we can still calculate partial metrics if we wanted, 
-            # but we will exit with error code at the end.
+            errors_occurred = True 
             predictions.extend([{} for _ in batch_reviews])
 
-    # --- SCORING ---
-    print("\n📊 Calculating Metrics...")
+    # --- SCORING & DIFF LOGGING ---
+    print("\n📊 Calculating Metrics & Diffing...")
     
     total_tp, total_fp, total_fn = 0, 0, 0
-    
+    diff_log = []
+
     for i, gold_item in enumerate(gold_data):
         gold_pros = set(gold_item.get("pros", []))
         gold_cons = set(gold_item.get("cons", []))
@@ -171,20 +165,42 @@ async def run_evaluation(model_key: str, limit: int, batch_size: int):
         gold_all = gold_pros.union(gold_cons)
         pred_all = pred_pros.union(pred_cons)
 
-        tp, fp, fn = calculate_metrics(gold_all, pred_all)
+        tp, fp, fn, fp_set, fn_set = calculate_metrics(gold_all, pred_all)
         total_tp += tp
         total_fp += fp
         total_fn += fn
+
+        # Log diffs if there are errors
+        if fp > 0 or fn > 0:
+            review_snippet = gold_item.get('review', '')[:80].replace("\n", " ") + "..."
+            diff_entry = {
+                "id": i,
+                "review": review_snippet,
+                "hallucinations (+)": list(fp_set),
+                "missed (-)": list(fn_set)
+            }
+            diff_log.append(diff_entry)
 
     precision = total_tp / (total_tp + total_fp) if (total_tp + total_fp) > 0 else 0
     recall = total_tp / (total_tp + total_fn) if (total_tp + total_fn) > 0 else 0
     f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
 
+    print("\n" + "="*60)
+    print(f"🛑 ERROR ANALYSIS (Showing {len(diff_log)} items)")
+    print("="*60)
+    
+    for diff in diff_log:
+        print(f"Review #{diff['id']}: \"{diff['review']}\"")
+        if diff["hallucinations (+)"]:
+            print(f"   (+) EXTRA: {', '.join(diff['hallucinations (+)'])}")
+        if diff["missed (-)"]:
+            print(f"   (-) MISSING: {', '.join(diff['missed (-)'])}")
+        print("-" * 40)
+
     print("\n" + "="*40)
     print(f"EVAL REPORT: {model_name}")
     print("="*40)
     print(f"Samples Evaluated: {total_items}")
-    print(f"Batch Size Used:   {effective_batch_size}")
     print("-" * 40)
     print(f"Precision: {precision:.2%}")
     print(f"Recall:    {recall:.2%}")
@@ -193,10 +209,9 @@ async def run_evaluation(model_key: str, limit: int, batch_size: int):
     print(f"Raw Counts -> TP: {total_tp}, FP: {total_fp}, FN: {total_fn}")
     print("="*40)
 
-    # FINAL FAILURE CHECK
     if errors_occurred:
         print("\n❌ FAILED: One or more batches encountered API/Parsing errors.")
-        sys.exit(1) # <--- Forces GitHub Action to turn RED
+        sys.exit(1)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
