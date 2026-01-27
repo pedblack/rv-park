@@ -152,10 +152,13 @@ client = genai.Client(api_key=GEMINI_API_KEY)
 
 
 class P4NScraper:
-    def __init__(self, is_dev=False, force=False, single_url=None, batch_size=1):
+    def __init__(
+        self, is_dev=False, force=False, single_url=None, search_url=None, batch_size=1
+    ):
         self.is_dev = is_dev
         self.force = force
         self.single_url = single_url
+        self.search_url = search_url
         self.batch_size = batch_size
         self.csv_file = DEV_CSV if is_dev else PROD_CSV
         self.processed_batch = []
@@ -456,6 +459,9 @@ class P4NScraper:
             if self.single_url:
                 target_urls = [self.single_url]
                 current_idx, total_idx = 1, 1
+            elif self.search_url:
+                target_urls = [self.search_url]
+                current_idx, total_idx = 1, 1
             else:
                 target_urls, current_idx, total_idx = (
                     DailyQueueManager.get_next_partition(self.batch_size)
@@ -563,7 +569,7 @@ class P4NScraper:
             ts_print(f"❌ Total Gemini Errors: {self.stats.get('gemini_errors', 0)}")
             ts_print("=" * 40)
 
-            if not self.is_dev and not self.single_url:
+            if not self.is_dev and not self.single_url and not self.search_url:
                 DailyQueueManager.increment_state(self.batch_size)
 
     def _upsert_and_save(self):
@@ -668,12 +674,19 @@ if __name__ == "__main__":
         help="Crawl a specific location URL (overrides daily queue)",
     )
     parser.add_argument(
+        "--search_url",
+        type=str,
+        default=None,
+        help="Crawl a specific search result URL (overrides daily queue, finds places inside)",
+    )
+    parser.add_argument(
         "--batch_size",
         type=int,
         default=1,
         help="Number of URLs to process from the queue",
     )
     args = parser.parse_args()
+
     url_arg = None
     if args.url:
         url_arg = args.url.strip()
@@ -682,11 +695,20 @@ if __name__ == "__main__":
         if url_arg.startswith('"') and url_arg.endswith('"'):
             url_arg = url_arg[1:-1]
 
+    search_url_arg = None
+    if args.search_url:
+        search_url_arg = args.search_url.strip()
+        if search_url_arg.startswith("'") and search_url_arg.endswith("'"):
+            search_url_arg = search_url_arg[1:-1]
+        if search_url_arg.startswith('"') and search_url_arg.endswith('"'):
+            search_url_arg = search_url_arg[1:-1]
+
     asyncio.run(
         P4NScraper(
             is_dev=args.dev,
             force=args.force,
             single_url=url_arg,
+            search_url=search_url_arg,
             batch_size=args.batch_size,
         ).start()
     )

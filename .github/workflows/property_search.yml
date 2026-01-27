@@ -26,6 +26,11 @@ on:
         required: false
         type: string
         default: ''
+      search_url:
+        description: 'Optional single search URL to discover properties'
+        required: false
+        type: string
+        default: ''
       batch_size:
         description: 'Number of URLs to crawl from queue'
         required: false
@@ -77,6 +82,8 @@ jobs:
           if [[ "${{ github.event.inputs.force_recrawl }}" == "true" ]]; then ARGS+=("--force"); fi
           
           if [[ -n "${{ github.event.inputs.url }}" ]]; then ARGS+=("--url" "${{ github.event.inputs.url }}"); fi
+          
+          if [[ -n "${{ github.event.inputs.search_url }}" ]]; then ARGS+=("--search_url" "${{ github.event.inputs.search_url }}"); fi
           
           if [[ -n "${{ github.event.inputs.batch_size }}" ]]; then ARGS+=("--batch_size" "${{ github.event.inputs.batch_size }}"); fi
           
