@@ -26,10 +26,12 @@ The input is a JSON list of strings (reviews).
 
 ### OUTPUT SCHEMA
 Return a JSON ARRAY of objects.
+**IMPORTANT:** Do NOT repeat the original review text. Return only the index (`id`), reasoning, and tags.
+
 [
     {
-        "review": "The original review text",
-        "reasoning": "Briefly explain WHY you selected these tags based on specific phrases.",
+        "id": 0, // The index of the review in the input list (0, 1, 2...)
+        "reasoning": "Briefly list specific phrases that triggered the tags.",
         "pros": ["tag_1", "tag_2"],
         "cons": ["tag_3"]
     }
